@@ -1,34 +1,62 @@
 import React, { useState } from 'react';
 import { aliens as initialAliens } from '../data/aliens';
+import { useNavigate } from 'react-router-dom';
 
 const tabs = [
   { label: 'Todos los Aliens', value: 'all' },
   { label: 'Favoritos', value: 'favorites' },
-  { label: 'Lista de prioridad', value: 'priority' },
 ];
 
 const HomePage: React.FC = () => {
   const [aliens] = useState(initialAliens);
   const [tab, setTab] = useState('all');
-  const activeAlien = aliens[1]; // Demo: XLR8
+  const [activeAlienId, setActiveAlienId] = useState(aliens[1].id); // Por defecto XLR8
+  const navigate = useNavigate();
+
+  const activeAlien = aliens.find(a => a.id === activeAlienId) || aliens[0];
+
+  const handleTabClick = (value: string) => {
+    if (value === 'favorites') {
+      navigate('/favoritos');
+    } else {
+      setTab(value);
+    }
+  };
 
   return (
     <div className="space-y-8">
       {/* Omnitrix Status y Alien Activo */}
       <div className="flex gap-8">
         <div className="bg-white rounded-xl shadow p-6 flex-1 flex flex-col items-center justify-center">
-          <div className="w-40 h-40 rounded-full border-8 border-green-500 bg-black flex items-center justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center">
-              <span className="text-3xl">⚡</span>
-            </div>
+          <div className="w-40 h-40 rounded-full border-8 border-green-500 bg-black flex items-center justify-center mb-4 overflow-hidden">
+            <img src={activeAlien.image} alt={activeAlien.name} className="w-36 h-36 object-contain mx-auto my-auto" />
           </div>
           <div className="text-center">
             <div className="text-sm text-gray-500 mb-1">Alien Activo</div>
             <div className="text-2xl font-bold mb-2">{activeAlien.name}</div>
             <div className="text-gray-600 mb-2">El Omnitrix está listo para transformación<br/>(cooldown: 10 minutos)</div>
-            <div className="flex gap-2 justify-center">
-              <button className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">Cambiar Alien</button>
-              <button className="bg-gray-200 text-gray-700 px-4 py-1 rounded hover:bg-gray-300">Ver Estadísticas</button>
+            <div className="flex gap-2 justify-center mb-2">
+              <select
+                className="border rounded px-3 py-1 bg-gray-100 text-black"
+                value={activeAlienId}
+                onChange={e => setActiveAlienId(e.target.value)}
+              >
+                {aliens.map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+              <button
+                className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+                onClick={() => setActiveAlienId(activeAlienId)}
+              >
+                Cambiar Alien
+              </button>
+              <button
+                className="bg-gray-200 text-gray-700 px-4 py-1 rounded hover:bg-gray-300"
+                onClick={() => navigate(`/estadisticas?alienId=${activeAlienId}`)}
+              >
+                Ver Estadísticas
+              </button>
             </div>
           </div>
         </div>
@@ -38,7 +66,7 @@ const HomePage: React.FC = () => {
         {tabs.map((t) => (
           <button
             key={t.value}
-            onClick={() => setTab(t.value)}
+            onClick={() => handleTabClick(t.value)}
             className={`px-4 py-2 rounded-t-lg font-semibold border-b-2 ${tab === t.value ? 'bg-white border-green-600 text-green-700' : 'bg-gray-200 border-transparent text-gray-500'}`}
           >
             {t.label}
