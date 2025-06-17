@@ -39,29 +39,45 @@ const FavoritesPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Mis Aliens Favoritos */}
-      <section>
-        <h2 className="text-xl font-bold mb-4 text-black">Mis Aliens Favoritos</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {favorites.map((alien) => (
-            <div key={alien.id} className="bg-white rounded-lg shadow p-4 relative flex flex-col">
-              <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">
-                ★
-              </span>
-              <div className="h-28 w-full bg-gray-200 rounded mb-2 flex items-center justify-center border border-gray-300 overflow-hidden">
-                <img src={alien.image} alt={alien.name} className="object-cover h-full w-full" />
-              </div>
-              <div className="font-bold text-lg text-black">{alien.name}</div>
-              <div className="text-gray-500 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
-              <button
-                className={`mt-auto px-3 py-1 rounded text-white ${alien.isActive ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'}`}
-                onClick={() => handleActivate(alien.id)}
-              >
-                {alien.isActive ? 'Activo' : 'Activar'}
-              </button>
-            </div>
-          ))}
+ <section>
+  <h2 className="text-xl font-bold mb-4 text-black">Mis Aliens Favoritos</h2>
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+    {favorites.map((alien) => (
+      <div
+        key={alien.id}
+        className="bg-white rounded-lg shadow p-4 relative flex flex-col min-h-[300px]"
+      >
+        <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">
+          ★
+        </span>
+        <div className="h-40 w-full bg-gray-100 rounded mb-4 border border-gray-200 flex items-center justify-center overflow-hidden">
+          <img
+            src={alien.image}
+            alt={alien.name}
+            className="h-full w-full object-contain"
+          />
         </div>
-      </section>
+        <div className="flex-1 flex flex-col justify-between">
+          <div>
+            <div className="font-bold text-lg text-black">{alien.name}</div>
+            <div className="text-gray-500 text-sm mb-4">
+              Usado {alien.stats.usageCount} veces
+            </div>
+          </div>
+          <button
+            className={`mt-auto px-3 py-1 rounded text-white ${
+              alien.isActive ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'
+            }`}
+            onClick={() => handleActivate(alien.id)}
+          >
+            {alien.isActive ? 'Activo' : 'Activar'}
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
       {/* Lista de Prioridad */}
       <section>
         <h2 className="text-xl font-bold mb-4 text-black">Lista de Prioridad</h2>

@@ -4,7 +4,7 @@ export const aliens: Alien[] = [
   {
     id: '1',
     name: 'Four Arms',
-    image: '/images/cuatrobrazos_original.webp',
+    image: '/images/Cuatrobrazos_original.webp',
     stats: {
       usageCount: 150,
       averageUsageTime: 15,
@@ -85,7 +85,7 @@ export const aliens: Alien[] = [
   {
     id: '6',
     name: 'Ripjaws',
-    image: '/images/ripjaws.png',
+    image: '/images/Ripjaws.webp',
     stats: {
       usageCount: 60,
       averageUsageTime: 18,
@@ -101,7 +101,7 @@ export const aliens: Alien[] = [
   {
     id: '7',
     name: 'Stinkfly',
-    image: '/images/stinkfly.png',
+    image: '/images/Stinkfly.webp',
     stats: {
       usageCount: 55,
       averageUsageTime: 14,
@@ -117,7 +117,7 @@ export const aliens: Alien[] = [
   {
     id: '8',
     name: 'Upgrade',
-    image: '/images/upgrade.png',
+    image: '/images/Upgrade.webp',
     stats: {
       usageCount: 80,
       averageUsageTime: 16,
@@ -133,7 +133,7 @@ export const aliens: Alien[] = [
   {
     id: '9',
     name: 'Wildmutt',
-    image: '/images/wildmutt.png',
+    image: '/images/Wildmutt.webp',
     stats: {
       usageCount: 65,
       averageUsageTime: 13,
@@ -149,7 +149,7 @@ export const aliens: Alien[] = [
   {
     id: '10',
     name: 'Ghostfreak',
-    image: '/images/ghostfreak.png',
+    image: '/images/Ghostfreak.webp',
     stats: {
       usageCount: 50,
       averageUsageTime: 11,
@@ -165,7 +165,7 @@ export const aliens: Alien[] = [
   {
     id: '11',
     name: 'Cannonbolt',
-    image: '/images/cannonbolt.png',
+    image: '/images/Cannonbolt.webp',
     stats: {
       usageCount: 75,
       averageUsageTime: 14,
@@ -181,7 +181,7 @@ export const aliens: Alien[] = [
   {
     id: '12',
     name: 'Wildvine',
-    image: '/images/wildvine.png',
+    image: '/images/Wildvine.webp',
     stats: {
       usageCount: 58,
       averageUsageTime: 12,
@@ -197,7 +197,7 @@ export const aliens: Alien[] = [
   {
     id: '13',
     name: 'Blitzwolfer',
-    image: '/images/blitzwolfer.png',
+    image: '/images/Blitzwolfe.webp',
     stats: {
       usageCount: 40,
       averageUsageTime: 10,
@@ -213,7 +213,7 @@ export const aliens: Alien[] = [
   {
     id: '14',
     name: 'Snare-oh',
-    image: '/images/snare-oh.png',
+    image: '/images/Snare.webp',
     stats: {
       usageCount: 38,
       averageUsageTime: 9,
@@ -229,7 +229,7 @@ export const aliens: Alien[] = [
   {
     id: '15',
     name: 'Frankenstrike',
-    image: '/images/frankenstrike.png',
+    image: '/images/Frankentrueno.webp',
     stats: {
       usageCount: 42,
       averageUsageTime: 11,

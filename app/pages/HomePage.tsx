@@ -82,23 +82,27 @@ const HomePage: React.FC = () => {
             <button className="bg-gray-100 px-3 py-1 rounded hover:bg-gray-200 text-sm w-full sm:w-auto">Ordenar</button>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {aliens.map((alien) => (
-            <div key={alien.id} className="bg-gray-50 rounded-lg p-4 shadow flex flex-col gap-2 relative">
-              {alien.isFavorite && (
-                <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">
-                  ★
-                </span>
-              )}
-              <div className="h-24 bg-gray-200 rounded mb-2" />
-              <div className="font-bold text-lg text-black">{alien.name}</div>
-              <div className="text-gray-500 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
-              <div className="flex gap-2 mt-auto flex-col sm:flex-row">
-                <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">Ver</button>
-                <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm">Activar</button>
-              </div>
-            </div>
-          ))}
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+  {aliens.map((alien) => (
+    <div key={alien.id} className="bg-gray-50 rounded-lg p-4 shadow flex flex-col gap-2 relative min-h-[280px]">
+      {alien.isFavorite && (
+        <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">
+          ★
+        </span>
+      )}
+      {/* Imagen del alien */}
+      <div className="h-32 w-full bg-gray-200 rounded mb-2 flex items-center justify-center overflow-hidden">
+        <img src={alien.image} alt={alien.name} className="h-full w-full object-contain" />
+      </div>
+      <div className="font-bold text-lg text-black">{alien.name}</div>
+      <div className="text-gray-500 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
+      <div className="flex gap-2 mt-auto flex-col sm:flex-row">
+        <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">Ver</button>
+        <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm">Activar</button>
+      </div>
+    </div>
+  ))}
+
         </div>
       </div>
     </div>

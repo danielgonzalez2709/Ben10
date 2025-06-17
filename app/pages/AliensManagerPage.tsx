@@ -28,7 +28,6 @@ const AliensManagerPage: React.FC = () => {
 
   return (
     <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full">
-      {/* Filtros laterales, colapsable en móvil */}
       <button className="md:hidden mb-2 bg-green-600 text-white px-4 py-2 rounded font-semibold shadow hover:bg-green-700 transition w-full" onClick={() => setShowFilters(!showFilters)}>
         {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
       </button>
@@ -77,7 +76,6 @@ const AliensManagerPage: React.FC = () => {
           </form>
         </div>
       </aside>
-      {/* Main content */}
       <section className="flex-1 w-full">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
           <h1 className="text-xl md:text-2xl font-bold text-black">Todos los Aliens</h1>
@@ -88,7 +86,6 @@ const AliensManagerPage: React.FC = () => {
             <button className="bg-green-600 text-white px-4 py-1 rounded font-semibold shadow hover:bg-green-700 transition">Filtros</button>
           </div>
         </div>
-        {/* Cards o lista */}
         {view === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {aliens.map(alien => (
@@ -96,7 +93,7 @@ const AliensManagerPage: React.FC = () => {
                 {alien.isFavorite && (
                   <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
                 )}
-                <div className="h-24 bg-gray-200 rounded mb-2" />
+                <img src={alien.image} alt={alien.name} className="h-32 object-contain rounded mb-2" />
                 <div className="font-bold text-lg text-black">{alien.name}</div>
                 <div className="text-gray-700 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
                 <div className="flex gap-2 mt-auto flex-col sm:flex-row">
@@ -113,7 +110,7 @@ const AliensManagerPage: React.FC = () => {
                 {alien.isFavorite && (
                   <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
                 )}
-                <div className="w-24 h-24 bg-gray-200 rounded mr-0 sm:mr-4 mb-2 sm:mb-0" />
+                <img src={alien.image} alt={alien.name} className="w-24 h-24 object-contain rounded" />
                 <div className="flex-1">
                   <div className="font-bold text-lg text-black">{alien.name}</div>
                   <div className="text-gray-700 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
@@ -131,4 +128,4 @@ const AliensManagerPage: React.FC = () => {
   );
 };
 
-export default AliensManagerPage; 
+export default AliensManagerPage;

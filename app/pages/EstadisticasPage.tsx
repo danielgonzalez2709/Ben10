@@ -45,10 +45,11 @@ const EstadisticasPage: React.FC = () => {
       </div>
       {/* Tarjeta principal */}
       <section className="bg-white rounded-xl shadow p-6 flex flex-col md:flex-row gap-6 items-center">
-        <div className="relative w-48 h-48 bg-gray-200 rounded border border-gray-300 flex items-center justify-center overflow-hidden">
-          <img src={alien.image} alt={alien.name} className="object-cover w-full h-full" />
-          <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
-        </div>
+<div className="relative w-48 h-48 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden">
+  <img src={alien.image} alt={alien.name} className="object-contain w-full h-full p-2" />
+  <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
+</div>
+
         <div className="flex-1 space-y-2">
           <h2 className="text-2xl font-bold text-black">{alien.name}</h2>
           <div className="flex flex-wrap gap-2 items-center text-gray-600 text-sm">
