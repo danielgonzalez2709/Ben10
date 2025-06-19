@@ -4,12 +4,11 @@ import { comments as initialComments } from '../data/comments';
 import AlienPopup from '../components/aliens/AlienPopup';
 import FavoriteList from '../components/favorites/FavoriteList';
 import type { Alien } from '../types/alien';
+import { useAliens } from '../context/AliensContext';
 
 const FavoritesPage: React.FC = () => {
-  // Solo aliens favoritos
-  const [favorites, setFavorites] = useState<Alien[]>(
-    initialAliens.filter((a) => a.isFavorite)
-  );
+  const { aliens, toggleFavorite } = useAliens();
+  const favorites = aliens.filter(a => a.isFavorite);
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments] = useState(initialComments);
@@ -19,9 +18,7 @@ const FavoritesPage: React.FC = () => {
 
   // Simular activar alien
   const handleActivate = (id: string) => {
-    setFavorites((prev) =>
-      prev.map((a) => ({ ...a, isActive: a.id === id }))
-    );
+    // Implementation needed
   };
 
   // Reordenar favoritos (drag & drop)
@@ -31,14 +28,12 @@ const FavoritesPage: React.FC = () => {
     const [reordered] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reordered);
     // Actualizar prioridad
-    setFavorites(
-      items.map((a, i) => ({ ...a, priority: i + 1 }))
-    );
+    // Implementation needed
   };
 
   // Eliminar de favoritos
   const handleRemove = (id: string) => {
-    setFavorites((prev) => prev.filter((a) => a.id !== id));
+    // Implementation needed
   };
 
   const handleOpenModal = (alien: Alien) => {
@@ -67,16 +62,20 @@ const FavoritesPage: React.FC = () => {
       {/* Mis Aliens Favoritos */}
  <section>
   <h2 className="text-xl font-bold mb-4 text-black">Mis Aliens Favoritos</h2>
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-    {favorites.map((alien) => (
+  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+    {favorites.length === 0 ? (
+      <div className="col-span-full text-center text-gray-500 text-lg py-12 font-semibold">
+        No hay ningún Alien agregado a la Lista de Favoritos
+      </div>
+    ) : favorites.map((alien) => (
       <div
         key={alien.id}
-        className="bg-white rounded-lg shadow p-4 relative flex flex-col min-h-[300px] cursor-pointer"
+        className="bg-white rounded-lg shadow p-4 relative flex flex-col min-h-[300px] cursor-pointer w-full max-w-full"
         onClick={() => handleOpenModal(alien)}
       >
-        <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">
-          ★
-        </span>
+        {alien.isFavorite && (
+          <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
+        )}
         <div className="h-40 w-full bg-gray-100 rounded mb-4 border border-gray-200 flex items-center justify-center overflow-hidden">
           <img
             src={alien.image}
@@ -86,19 +85,19 @@ const FavoritesPage: React.FC = () => {
         </div>
         <div className="flex-1 flex flex-col justify-between">
           <div>
-            <div className="font-bold text-lg text-black">{alien.name}</div>
+            <div className="font-bold text-lg text-black break-words truncate max-w-full text-center w-full">{alien.name}</div>
             <div className="text-gray-500 text-sm mb-4">
               Usado {alien.stats.usageCount} veces
             </div>
           </div>
-          <button
-            className={`mt-auto px-3 py-1 rounded text-white ${
-              alien.isActive ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'
-            }`}
-            onClick={e => { e.stopPropagation(); handleActivate(alien.id); }}
-          >
-            {alien.isActive ? 'Activo' : 'Activar'}
-          </button>
+          <div className="flex flex-col gap-2 w-full mt-2">
+            <button
+              className="px-3 py-1 rounded text-sm bg-yellow-400 text-white w-full"
+              onClick={e => { e.stopPropagation(); toggleFavorite(alien.id); }}
+            >
+              Quitar de Favoritos
+            </button>
+          </div>
         </div>
       </div>
     ))}

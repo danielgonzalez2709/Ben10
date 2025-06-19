@@ -4,6 +4,7 @@ import { comments as initialComments } from '../data/comments';
 import AlienPopup from '../components/aliens/AlienPopup';
 import { useNavigate } from 'react-router-dom';
 import type { Alien } from '../types/alien';
+import { useAliens } from '../context/AliensContext';
 
 const tabs = [
   { label: 'Todos los Aliens', value: 'all' },
@@ -11,7 +12,7 @@ const tabs = [
 ];
 
 const HomePage: React.FC = () => {
-  const [aliens] = useState(initialAliens);
+  const { aliens, toggleFavorite } = useAliens();
   const [tab, setTab] = useState('all');
   const [activeAlienId, setActiveAlienId] = useState(aliens[1].id); // Por defecto XLR8
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
@@ -105,31 +106,36 @@ const HomePage: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
           <h2 className="text-xl font-bold text-black">Aliens Disponibles</h2>
           <div className="flex gap-2 w-full sm:w-auto">
-            <button className="bg-gray-100 px-3 py-1 rounded hover:bg-gray-200 text-sm w-full sm:w-auto">Filtrar</button>
-            <button className="bg-gray-100 px-3 py-1 rounded hover:bg-gray-200 text-sm w-full sm:w-auto">Ordenar</button>
+            <button className="bg-green-600 text-white px-4 py-2 rounded shadow font-semibold text-base hover:bg-green-700 transition w-full sm:w-auto">Filtrar</button>
+            <button className="bg-green-600 text-white px-4 py-2 rounded shadow font-semibold text-base hover:bg-green-700 transition w-full sm:w-auto">Ordenar</button>
           </div>
         </div>
-<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-  {aliens.map((alien) => (
-    <div key={alien.id} className="bg-gray-50 rounded-lg p-4 shadow flex flex-col gap-2 relative min-h-[280px]">
-      {alien.isFavorite && (
-        <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">
-          ★
-        </span>
-      )}
-      {/* Imagen del alien */}
-      <div className="h-32 w-full bg-gray-200 rounded mb-2 flex items-center justify-center overflow-hidden">
-        <img src={alien.image} alt={alien.name} className="h-full w-full object-contain" />
-      </div>
-      <div className="font-bold text-lg text-black">{alien.name}</div>
-      <div className="text-gray-500 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
-      <div className="flex gap-2 mt-auto flex-col sm:flex-row">
-        <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm" onClick={() => handleOpenModal(alien)}>Ver</button>
-        <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm">Activar</button>
-      </div>
-    </div>
-  ))}
-
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {aliens.map((alien) => (
+            <div key={alien.id} className="bg-gray-50 rounded-lg p-4 shadow flex flex-col gap-2 relative min-h-[280px] w-full max-w-full">
+              {alien.isFavorite && (
+                <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">
+                  ★
+                </span>
+              )}
+              {/* Imagen del alien */}
+              <div className="h-32 w-full bg-gray-200 rounded mb-2 flex items-center justify-center overflow-hidden">
+                <img src={alien.image} alt={alien.name} className="h-full w-full object-contain" />
+              </div>
+              <div className="font-bold text-lg text-black">{alien.name}</div>
+              <div className="text-gray-500 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
+              <div className="flex flex-col gap-2 mt-auto w-full">
+                <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm w-full" onClick={() => handleOpenModal(alien)}>Ver</button>
+                <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full" onClick={() => setActiveAlienId(alien.id)}>Activar</button>
+                <button
+                  className={`px-3 py-1 rounded text-sm w-full ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+                  onClick={() => toggleFavorite(alien.id)}
+                >
+                  {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
       <AlienPopup

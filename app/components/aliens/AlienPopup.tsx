@@ -3,6 +3,7 @@ import type { Alien } from '../../types/alien';
 import type { Comment } from '../../types/comment';
 import AlienStats from './AlienStats';
 import Modal from '../Modal';
+import { useAliens } from '../../context/AliensContext';
 
 interface AlienPopupProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
   onEditComment,
   onDeleteComment,
 }) => {
+  const { toggleFavorite } = useAliens();
   if (!alien) return null;
 
   // Tomar el comentario más popular (más likes)
@@ -43,13 +45,16 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col md:flex-row w-full max-w-4xl min-h-[500px] md:min-h-[420px] p-0 md:p-4">
         {/* Imagen del Alien */}
-        <div className="md:w-1/2 w-full flex items-center justify-center bg-white p-6 md:p-8">
+        <div className="md:w-1/2 w-full flex items-center justify-center bg-white p-6 md:p-8 relative">
           <img
             src={alien.image}
             alt={alien.name}
             className="w-full h-80 md:h-[350px] object-contain rounded-lg shadow-lg bg-gray-100"
             style={{ maxWidth: '340px' }}
           />
+          {alien.isFavorite && (
+            <span className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-2xl">★</span>
+          )}
         </div>
         {/* Info y comentarios */}
         <div className="md:w-1/2 w-full flex flex-col justify-between p-6 md:p-4 gap-2">
@@ -85,6 +90,12 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
                 onClick={() => window.location.href = `/estadisticas?alienId=${alien.id}`}
               >
                 Ver Estadísticas
+              </button>
+              <button
+                className={`mb-4 px-4 py-2 w-full font-semibold rounded ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+                onClick={() => toggleFavorite(alien.id)}
+              >
+                {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
               </button>
             </div>
             {/* Comentario destacado */}

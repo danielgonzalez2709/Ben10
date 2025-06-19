@@ -14,13 +14,13 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row w-full max-w-full overflow-x-hidden">
       {/* Sidebar responsive */}
       {/* Overlay para móvil */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
-      <aside className={`fixed z-50 md:static top-0 left-0 h-full w-64 bg-white border-r flex flex-col transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+      <aside className={`fixed z-50 md:static top-0 left-0 h-full w-64 bg-white border-r flex flex-col transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`} style={{maxWidth: '100vw'}}>
         <div className="flex items-center gap-2 px-6 py-4 border-b">
           {/* Mini Omnitrix */}
           <div className="relative w-7 h-7 flex items-center justify-center">
@@ -47,9 +47,9 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </nav>
       </aside>
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full max-w-full">
         {/* Header */}
-        <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-8 text-white shadow relative">
+        <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-8 text-white shadow relative w-full max-w-full">
           {/* Botón hamburguesa solo en móvil */}
           <button
             className="md:hidden mr-2 p-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-white"
@@ -60,13 +60,13 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="text-xl md:text-2xl font-bold tracking-wide">Omnitrix Manager</span>
+          <span className="text-xl md:text-2xl font-bold tracking-wide truncate">Omnitrix Manager</span>
           <div className="flex items-center gap-2">
             <span className="bg-white text-green-700 px-3 py-1 rounded-full font-semibold text-sm md:text-base">Ben10</span>
           </div>
         </header>
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-2 md:p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-2 md:p-8 w-full max-w-full">{children}</main>
       </div>
     </div>
   );

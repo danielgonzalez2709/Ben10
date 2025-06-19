@@ -4,6 +4,7 @@ import { aliens as originalAliens } from '../data/aliens';
 import { comments as initialComments } from '../data/comments';
 import AlienPopup from '../components/aliens/AlienPopup';
 import AlienStats from '../components/aliens/AlienStats';
+import { useAliens } from '../context/AliensContext';
 
 // Cambiar el nombre 'Calor' por 'Heat' en los datos
 const aliens = originalAliens.map(a => a.name === 'Calor' ? { ...a, name: 'Heat' } : a);
@@ -22,7 +23,8 @@ const EstadisticasPage: React.FC = () => {
   const [selectedAlien, setSelectedAlien] = useState(aliens.find(a => a.id === (alienId || defaultId)) || aliens[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments] = useState(initialComments);
-  const alien = aliens.find((a) => a.id === selectedId);
+  const { aliens: contextAliens, toggleFavorite } = useAliens();
+  const alien = contextAliens.find((a) => a.id === selectedId);
   if (!alien) return <div>No se encontró el alien.</div>;
 
   const handleOpenModal = (alienObj: typeof aliens[0]) => {
@@ -69,21 +71,28 @@ const EstadisticasPage: React.FC = () => {
         </label>
       </div>
       {/* Tarjeta principal */}
-      <section className="bg-white rounded-xl shadow p-6 flex flex-col md:flex-row gap-6 items-center">
-        <div className="relative w-48 h-48 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer" onClick={() => handleOpenModal(alien)}>
+      <section className="bg-white rounded-xl shadow p-6 flex flex-col md:flex-row gap-6 items-center w-full max-w-full">
+        <div className="relative w-full max-w-xs h-48 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer" onClick={() => handleOpenModal(alien)}>
           <img src={alien.image} alt={alien.name} className="object-contain w-full h-full p-2" />
-          <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
+          {alien.isFavorite && (
+            <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
+          )}
         </div>
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2 w-full">
           <h2 className="text-2xl font-bold text-black cursor-pointer" onClick={() => handleOpenModal(alien)}>{alien.name}</h2>
           <div className="flex flex-wrap gap-2 items-center text-gray-600 text-sm">
             <span>Usado <span className="font-bold text-black">{alien.stats.usageCount}</span> veces</span>
             <span className="flex items-center gap-1">🗨️ <span className="font-bold text-black">{alien.stats.commentCount}</span> comentarios</span>
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
-            <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">Activar Alien</button>
-            <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm">Agregar a Prioridad</button>
-            <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm">Quitar de Favoritos</button>
+            <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm w-full sm:w-auto">Activar Alien</button>
+            <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full sm:w-auto">Agregar a Prioridad</button>
+            <button
+              className={`px-3 py-1 rounded text-sm w-full sm:w-auto ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+              onClick={() => toggleFavorite(alien.id)}
+            >
+              {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
+            </button>
           </div>
         </div>
         <AlienPopup

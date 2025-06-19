@@ -5,9 +5,10 @@ import { comments as initialComments } from '../data/comments';
 import AlienList from '../components/aliens/AlienList';
 import AlienPopup from '../components/aliens/AlienPopup';
 import type { Alien } from '../types/alien';
+import { useAliens } from '../context/AliensContext';
 
 const AliensPage: React.FC = () => {
-  const [aliens, setAliens] = useState<Alien[]>(initialAliens);
+  const { aliens, toggleFavorite } = useAliens();
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments] = useState(initialComments);
@@ -16,14 +17,6 @@ const AliensPage: React.FC = () => {
   const handleAlienClick = (alien: Alien) => {
     setSelectedAlien(alien);
     setIsModalOpen(true);
-  };
-
-  const handleFavoriteToggle = (alienId: string) => {
-    setAliens((prev) =>
-      prev.map((alien) =>
-        alien.id === alienId ? { ...alien, isFavorite: !alien.isFavorite } : alien
-      )
-    );
   };
 
   const handleCloseModal = () => {
@@ -47,14 +40,14 @@ const AliensPage: React.FC = () => {
       <AlienList
         aliens={aliens}
         onAlienClick={handleAlienClick}
-        onFavoriteToggle={handleFavoriteToggle}
+        onFavoriteToggle={toggleFavorite}
       />
       <AlienPopup
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         alien={selectedAlien}
         comments={filteredComments}
-        onFavoriteToggle={onFavoriteToggle}
+        onFavoriteToggle={() => selectedAlien && toggleFavorite(selectedAlien.id)}
         onAddComment={onAddComment}
         onLikeComment={onLikeComment}
         onEditComment={onEditComment}
