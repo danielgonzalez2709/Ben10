@@ -122,7 +122,7 @@ const EstadisticasPage: React.FC = () => {
             <h4 className="font-semibold mb-4 text-black">Capacidades</h4>
             <div className="mb-4">
               <div className="flex justify-between mb-1">
-                <span>Fuerza</span>
+                <span className="text-lg font-bold text-black">Fuerza</span>
                 <span className="font-bold text-black">{alien.stats.strength}/10</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -131,7 +131,7 @@ const EstadisticasPage: React.FC = () => {
             </div>
             <div className="mb-4">
               <div className="flex justify-between mb-1">
-                <span>Velocidad</span>
+                <span className="text-lg font-bold text-black">Velocidad</span>
                 <span className="font-bold text-black">{alien.stats.speed}/10</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -140,7 +140,7 @@ const EstadisticasPage: React.FC = () => {
             </div>
             <div className="mb-4">
               <div className="flex justify-between mb-1">
-                <span>Habilidades</span>
+                <span className="text-lg font-bold text-black">Habilidades</span>
                 <span className="font-bold text-black">{alien.stats.abilities.length}/10</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2.5">
