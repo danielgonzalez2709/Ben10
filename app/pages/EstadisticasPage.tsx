@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { aliens as originalAliens } from '../data/aliens';
+import { comments as initialComments } from '../data/comments';
+import AlienPopup from '../components/aliens/AlienPopup';
 import AlienStats from '../components/aliens/AlienStats';
 
 // Cambiar el nombre 'Calor' por 'Heat' en los datos
@@ -17,8 +19,31 @@ const EstadisticasPage: React.FC = () => {
   // Selector de alien (por defecto 'Heat' si existe, si no el primero)
   const defaultId = aliens.find(a => a.name === 'Heat')?.id || aliens[0].id;
   const [selectedId, setSelectedId] = useState(alienId || defaultId);
+  const [selectedAlien, setSelectedAlien] = useState(aliens.find(a => a.id === (alienId || defaultId)) || aliens[0]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [comments] = useState(initialComments);
   const alien = aliens.find((a) => a.id === selectedId);
   if (!alien) return <div>No se encontró el alien.</div>;
+
+  const handleOpenModal = (alienObj: typeof aliens[0]) => {
+    setSelectedAlien(alienObj);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // Funciones dummy para comentarios (puedes implementar lógica real si lo deseas)
+  const onFavoriteToggle = () => {};
+  const onAddComment = (content: string, parentId?: string) => {};
+  const onLikeComment = (commentId: string) => {};
+  const onEditComment = (commentId: string, content: string) => {};
+  const onDeleteComment = (commentId: string) => {};
+
+  const filteredComments = selectedAlien
+    ? comments.filter((c) => c.alienId === selectedAlien.id)
+    : [];
 
   return (
     <div className="space-y-8">
@@ -35,7 +60,7 @@ const EstadisticasPage: React.FC = () => {
           <select
             className="ml-2 px-2 py-1 border rounded bg-white"
             value={selectedId}
-            onChange={e => setSelectedId(e.target.value)}
+            onChange={e => { setSelectedId(e.target.value); setSelectedAlien(aliens.find(a => a.id === e.target.value) || aliens[0]); }}
           >
             {aliens.map(a => (
               <option key={a.id} value={a.id}>{a.name}</option>
@@ -45,13 +70,12 @@ const EstadisticasPage: React.FC = () => {
       </div>
       {/* Tarjeta principal */}
       <section className="bg-white rounded-xl shadow p-6 flex flex-col md:flex-row gap-6 items-center">
-<div className="relative w-48 h-48 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden">
-  <img src={alien.image} alt={alien.name} className="object-contain w-full h-full p-2" />
-  <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
-</div>
-
+        <div className="relative w-48 h-48 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer" onClick={() => handleOpenModal(alien)}>
+          <img src={alien.image} alt={alien.name} className="object-contain w-full h-full p-2" />
+          <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
+        </div>
         <div className="flex-1 space-y-2">
-          <h2 className="text-2xl font-bold text-black">{alien.name}</h2>
+          <h2 className="text-2xl font-bold text-black cursor-pointer" onClick={() => handleOpenModal(alien)}>{alien.name}</h2>
           <div className="flex flex-wrap gap-2 items-center text-gray-600 text-sm">
             <span>Usado <span className="font-bold text-black">{alien.stats.usageCount}</span> veces</span>
             <span className="flex items-center gap-1">🗨️ <span className="font-bold text-black">{alien.stats.commentCount}</span> comentarios</span>
@@ -62,6 +86,17 @@ const EstadisticasPage: React.FC = () => {
             <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm">Quitar de Favoritos</button>
           </div>
         </div>
+        <AlienPopup
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          alien={selectedAlien}
+          comments={filteredComments}
+          onFavoriteToggle={onFavoriteToggle}
+          onAddComment={onAddComment}
+          onLikeComment={onLikeComment}
+          onEditComment={onEditComment}
+          onDeleteComment={onDeleteComment}
+        />
       </section>
       {/* Estadísticas */}
       <section>

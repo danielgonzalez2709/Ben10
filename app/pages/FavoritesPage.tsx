@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { aliens as initialAliens } from '../data/aliens';
+import { comments as initialComments } from '../data/comments';
+import AlienPopup from '../components/aliens/AlienPopup';
 import FavoriteList from '../components/favorites/FavoriteList';
 import type { Alien } from '../types/alien';
 
@@ -8,6 +10,9 @@ const FavoritesPage: React.FC = () => {
   const [favorites, setFavorites] = useState<Alien[]>(
     initialAliens.filter((a) => a.isFavorite)
   );
+  const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [comments] = useState(initialComments);
 
   // Ordenar por prioridad
   const priorityList = [...favorites].sort((a, b) => a.priority - b.priority);
@@ -36,6 +41,27 @@ const FavoritesPage: React.FC = () => {
     setFavorites((prev) => prev.filter((a) => a.id !== id));
   };
 
+  const handleOpenModal = (alien: Alien) => {
+    setSelectedAlien(alien);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedAlien(null);
+  };
+
+  // Funciones dummy para comentarios (puedes implementar lógica real si lo deseas)
+  const onFavoriteToggle = () => {};
+  const onAddComment = (content: string, parentId?: string) => {};
+  const onLikeComment = (commentId: string) => {};
+  const onEditComment = (commentId: string, content: string) => {};
+  const onDeleteComment = (commentId: string) => {};
+
+  const filteredComments = selectedAlien
+    ? comments.filter((c) => c.alienId === selectedAlien.id)
+    : [];
+
   return (
     <div className="space-y-8">
       {/* Mis Aliens Favoritos */}
@@ -45,7 +71,8 @@ const FavoritesPage: React.FC = () => {
     {favorites.map((alien) => (
       <div
         key={alien.id}
-        className="bg-white rounded-lg shadow p-4 relative flex flex-col min-h-[300px]"
+        className="bg-white rounded-lg shadow p-4 relative flex flex-col min-h-[300px] cursor-pointer"
+        onClick={() => handleOpenModal(alien)}
       >
         <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">
           ★
@@ -68,7 +95,7 @@ const FavoritesPage: React.FC = () => {
             className={`mt-auto px-3 py-1 rounded text-white ${
               alien.isActive ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'
             }`}
-            onClick={() => handleActivate(alien.id)}
+            onClick={e => { e.stopPropagation(); handleActivate(alien.id); }}
           >
             {alien.isActive ? 'Activo' : 'Activar'}
           </button>
@@ -76,6 +103,17 @@ const FavoritesPage: React.FC = () => {
       </div>
     ))}
   </div>
+  <AlienPopup
+    isOpen={isModalOpen}
+    onClose={handleCloseModal}
+    alien={selectedAlien}
+    comments={filteredComments}
+    onFavoriteToggle={onFavoriteToggle}
+    onAddComment={onAddComment}
+    onLikeComment={onLikeComment}
+    onEditComment={onEditComment}
+    onDeleteComment={onDeleteComment}
+  />
 </section>
 
       {/* Lista de Prioridad */}

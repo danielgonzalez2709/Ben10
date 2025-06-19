@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { aliens as initialAliens } from '../data/aliens';
+import { comments as initialComments } from '../data/comments';
+import AlienPopup from '../components/aliens/AlienPopup';
+import type { Alien } from '../types/alien';
 
 const categories = [
   { label: 'Todos', value: 'all', count: 20 },
@@ -25,6 +28,30 @@ const AliensManagerPage: React.FC = () => {
   const [selectedHabilidades, setSelectedHabilidades] = useState<string[]>([]);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [comments] = useState(initialComments);
+
+  const handleOpenModal = (alien: Alien) => {
+    setSelectedAlien(alien);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedAlien(null);
+  };
+
+  // Funciones dummy para comentarios (puedes implementar lógica real si lo deseas)
+  const onFavoriteToggle = () => {};
+  const onAddComment = (content: string, parentId?: string) => {};
+  const onLikeComment = (commentId: string) => {};
+  const onEditComment = (commentId: string, content: string) => {};
+  const onDeleteComment = (commentId: string) => {};
+
+  const filteredComments = selectedAlien
+    ? comments.filter((c) => c.alienId === selectedAlien.id)
+    : [];
 
   return (
     <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full">
@@ -97,7 +124,7 @@ const AliensManagerPage: React.FC = () => {
                 <div className="font-bold text-lg text-black">{alien.name}</div>
                 <div className="text-gray-700 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
                 <div className="flex gap-2 mt-auto flex-col sm:flex-row">
-                  <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">Ver</button>
+                  <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm" onClick={() => handleOpenModal(alien)}>Ver</button>
                   <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm">Activar</button>
                 </div>
               </div>
@@ -116,13 +143,24 @@ const AliensManagerPage: React.FC = () => {
                   <div className="text-gray-700 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
                 </div>
                 <div className="flex gap-2 flex-col sm:flex-row">
-                  <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">Ver</button>
+                  <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm" onClick={() => handleOpenModal(alien)}>Ver</button>
                   <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm">Activar</button>
                 </div>
               </div>
             ))}
           </div>
         )}
+        <AlienPopup
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          alien={selectedAlien}
+          comments={filteredComments}
+          onFavoriteToggle={onFavoriteToggle}
+          onAddComment={onAddComment}
+          onLikeComment={onLikeComment}
+          onEditComment={onEditComment}
+          onDeleteComment={onDeleteComment}
+        />
       </section>
     </div>
   );
