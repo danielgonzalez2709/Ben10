@@ -54,6 +54,9 @@ const AliensManagerPage: React.FC = () => {
     ? comments.filter((c) => c.alienId === selectedAlien.id)
     : [];
 
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isSuperUser = user && user.isSuperUser;
+
   return (
     <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full">
       <button className="md:hidden mb-2 bg-green-600 text-white px-4 py-2 rounded font-semibold shadow hover:bg-green-700 transition w-full" onClick={() => setShowFilters(!showFilters)}>
@@ -126,13 +129,17 @@ const AliensManagerPage: React.FC = () => {
                 <div className="text-gray-700 text-sm mb-2">Usado {alien.stats.usageCount} veces</div>
                 <div className="flex flex-col gap-2 mt-auto w-full">
                   <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm w-full" onClick={() => handleOpenModal(alien)}>Ver</button>
-                  <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full">Activar</button>
-                  <button
-                    className={`px-3 py-1 rounded text-sm w-full ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
-                    onClick={() => toggleFavorite(alien.id)}
-                  >
-                    {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
-                  </button>
+                  {isSuperUser && (
+                    <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full">Activar</button>
+                  )}
+                  {isSuperUser && (
+                    <button
+                      className={`px-3 py-1 rounded text-sm w-full ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+                      onClick={() => toggleFavorite(alien.id)}
+                    >
+                      {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -151,13 +158,17 @@ const AliensManagerPage: React.FC = () => {
                 </div>
                 <div className="flex flex-col gap-2 w-full sm:w-auto">
                   <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm w-full sm:w-auto" onClick={() => handleOpenModal(alien)}>Ver</button>
-                  <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full sm:w-auto">Activar</button>
-                  <button
-                    className={`px-3 py-1 rounded text-sm w-full sm:w-auto ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
-                    onClick={() => toggleFavorite(alien.id)}
-                  >
-                    {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
-                  </button>
+                  {isSuperUser && (
+                    <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full sm:w-auto">Activar</button>
+                  )}
+                  {isSuperUser && (
+                    <button
+                      className={`px-3 py-1 rounded text-sm w-full sm:w-auto ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+                      onClick={() => toggleFavorite(alien.id)}
+                    >
+                      {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

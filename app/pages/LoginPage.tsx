@@ -15,25 +15,49 @@ const LoginPage: React.FC = () => {
   const [showRegister, setShowRegister] = useState(false);
   const [registerData, setRegisterData] = useState({ username: '', password: '', name: '' });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = users.find(u => u.username === username && u.password === password);
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-      navigate('/');
-    } else {
-      setError('Usuario o contraseña incorrectos');
+    setError('');
+    try {
+      const res = await fetch('http://localhost:3001/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/');
+      } else {
+        setError(data.error || 'Error al iniciar sesión');
+      }
+    } catch (err) {
+      setError('Error de conexión con el servidor');
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (!registerData.username || !registerData.password || !registerData.name) {
       setError('Completa todos los campos');
       return;
     }
-    localStorage.setItem('user', JSON.stringify({ ...registerData, isAdmin: false }));
-    navigate('/');
+    try {
+      const res = await fetch('http://localhost:3001/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: registerData.username, password: registerData.password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        navigate('/');
+      } else {
+        setError(data.error || 'Error al registrarse');
+      }
+    } catch (err) {
+      setError('Error de conexión con el servidor');
+    }
   };
 
   return (

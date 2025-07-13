@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "name": "XLR8",
+    "image": "",
+    "stats": { "strength": 7, "speed": 10, "abilities": ["Super Speed", "Sharp Claws", "Enhanced Reflexes"] },
+    "favorite": false
+  },
+  {
+    "id": "2",
+    "name": "Cuatrobrazos",
+    "image": "",
+    "stats": { "strength": 10, "speed": 5, "abilities": ["Super Strength", "Jump", "Shockwaves"] },
+    "favorite": false
+  }
+] 

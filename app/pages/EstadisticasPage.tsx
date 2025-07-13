@@ -47,6 +47,9 @@ const EstadisticasPage: React.FC = () => {
     ? comments.filter((c) => c.alienId === selectedAlien.id)
     : [];
 
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isSuperUser = user && user.isSuperUser;
+
   return (
     <div className="space-y-8">
       {/* Selector de alien */}
@@ -85,14 +88,18 @@ const EstadisticasPage: React.FC = () => {
             <span className="flex items-center gap-1">🗨️ <span className="font-bold text-black">{alien.stats.commentCount}</span> comentarios</span>
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
-            <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm w-full sm:w-auto">Activar Alien</button>
+            {isSuperUser && (
+              <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm w-full sm:w-auto">Activar Alien</button>
+            )}
             <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full sm:w-auto">Agregar a Prioridad</button>
-            <button
-              className={`px-3 py-1 rounded text-sm w-full sm:w-auto ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
-              onClick={() => toggleFavorite(alien.id)}
-            >
-              {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
-            </button>
+            {isSuperUser && (
+              <button
+                className={`px-3 py-1 rounded text-sm w-full sm:w-auto ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+                onClick={() => toggleFavorite(alien.id)}
+              >
+                {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
+              </button>
+            )}
           </div>
         </div>
         <AlienPopup

@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import MainLayout from './layout/MainLayout';
 import HomePage from './pages/HomePage';
 import { AliensProvider } from './context/AliensContext';
+import { CommentsProvider } from './context/CommentsContext';
 
 const Root: React.FC = () => {
   const location = useLocation();
@@ -11,9 +12,11 @@ const Root: React.FC = () => {
   }
   return (
     <AliensProvider>
-      <MainLayout>
-        {location.pathname === '/' ? <HomePage /> : <Outlet />}
-      </MainLayout>
+      <CommentsProvider>
+        <MainLayout>
+          {location.pathname === '/' ? <HomePage /> : <Outlet />}
+        </MainLayout>
+      </CommentsProvider>
     </AliensProvider>
   );
 };

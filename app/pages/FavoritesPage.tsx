@@ -12,6 +12,8 @@ const FavoritesPage: React.FC = () => {
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments] = useState(initialComments);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isSuperUser = user && user.isSuperUser;
 
   // Ordenar por prioridad
   const priorityList = [...favorites].sort((a, b) => a.priority - b.priority);
@@ -91,12 +93,14 @@ const FavoritesPage: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col gap-2 w-full mt-2">
-            <button
-              className="px-3 py-1 rounded text-sm bg-yellow-400 text-white w-full"
-              onClick={e => { e.stopPropagation(); toggleFavorite(alien.id); }}
-            >
-              Quitar de Favoritos
-            </button>
+            {isSuperUser && (
+              <button
+                className="px-3 py-1 rounded text-sm bg-yellow-400 text-white w-full"
+                onClick={e => { e.stopPropagation(); toggleFavorite(alien.id); }}
+              >
+                Quitar de Favoritos
+              </button>
+            )}
           </div>
         </div>
       </div>

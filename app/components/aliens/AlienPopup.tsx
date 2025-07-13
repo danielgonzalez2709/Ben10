@@ -4,6 +4,7 @@ import type { Comment } from '../../types/comment';
 import AlienStats from './AlienStats';
 import Modal from '../Modal';
 import { useAliens } from '../../context/AliensContext';
+import { useNavigate } from 'react-router-dom';
 
 interface AlienPopupProps {
   isOpen: boolean;
@@ -29,7 +30,12 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
   onDeleteComment,
 }) => {
   const { toggleFavorite } = useAliens();
+  const navigate = useNavigate();
+  const [activateMsg, setActivateMsg] = React.useState<string | null>(null);
   if (!alien) return null;
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isSuperUser = user && user.isSuperUser;
 
   // Tomar el comentario más popular (más likes)
   const topComment = comments
@@ -38,7 +44,35 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
   const respuestas = topComment?.replies?.length || 0;
 
   const handleVerComentarios = () => {
-    window.location.href = `/comentarios?alienId=${alien.id}`;
+    navigate(`/comentarios?alienId=${alien.id}`);
+  };
+
+  const handleActivate = async () => {
+    setActivateMsg(null);
+    if (!alien) return;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setActivateMsg('No hay sesión activa');
+      return;
+    }
+    try {
+      const res = await fetch(`http://localhost:3001/api/aliens/${alien.id}/activate`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActivateMsg('¡Alien activado correctamente!');
+      } else {
+        setActivateMsg(data.error || 'Error al activar alien');
+      }
+    } catch (err) {
+      setActivateMsg('Error de conexión con el servidor');
+    }
   };
 
   return (
@@ -91,12 +125,25 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
               >
                 Ver Estadísticas
               </button>
-              <button
-                className={`mb-4 px-4 py-2 w-full font-semibold rounded ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
-                onClick={() => toggleFavorite(alien.id)}
-              >
-                {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
-              </button>
+              {isSuperUser && (
+                <button
+                  className={`mb-4 px-4 py-2 w-full font-semibold rounded ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+                  onClick={() => onFavoriteToggle()}
+                >
+                  {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
+                </button>
+              )}
+              {isSuperUser && (
+                <button
+                  className="mb-4 px-4 py-2 w-full font-semibold rounded bg-green-600 text-white hover:bg-green-700"
+                  onClick={handleActivate}
+                >
+                  Activar Alien
+                </button>
+              )}
+              {activateMsg && (
+                <div className="mb-2 text-center text-sm font-semibold text-green-700">{activateMsg}</div>
+              )}
             </div>
             {/* Comentario destacado */}
             <div className="bg-gray-50 rounded-lg p-4 shadow-inner mb-2">

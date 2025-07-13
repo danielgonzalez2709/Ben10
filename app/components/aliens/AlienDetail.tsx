@@ -23,6 +23,9 @@ const AlienDetail: React.FC<AlienDetailProps> = ({
   onEditComment,
   onDeleteComment,
 }) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isSuperUser = user && user.isSuperUser;
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -32,12 +35,14 @@ const AlienDetail: React.FC<AlienDetailProps> = ({
             alt={alien.name}
             className="w-full h-96 object-cover"
           />
-          <button
-            onClick={onFavoriteToggle}
-            className="absolute top-4 right-4 p-3 bg-white rounded-full shadow-lg hover:bg-gray-100"
-          >
-            {alien.isFavorite ? '❤️' : '🤍'}
-          </button>
+          {isSuperUser && (
+            <button
+              onClick={onFavoriteToggle}
+              className="absolute top-4 right-4 p-3 bg-white rounded-full shadow-lg hover:bg-gray-100"
+            >
+              {alien.isFavorite ? '❤️' : '🤍'}
+            </button>
+          )}
         </div>
 
         <div className="p-6">
