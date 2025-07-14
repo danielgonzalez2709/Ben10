@@ -1,7 +1,9 @@
 import { Router } from 'express';
-import { getAllAliens, getAlienById, addAlien, updateAlien, deleteAlien, Alien } from '../models/aliensData';
+import { getAllAliens, getAlienById, addAlien, updateAlien, deleteAlien, Alien, setAllAliens } from '../models/aliensData';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticateJWT, AuthRequest } from '../middleware/auth';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
 
@@ -76,8 +78,14 @@ router.put('/:id/favorite', authenticateJWT, (req: AuthRequest, res) => {
 // PUT /api/aliens/:id/activate
 router.put('/:id/activate', authenticateJWT, (req: AuthRequest, res) => {
   if (!req.user?.isSuperUser) return res.status(403).json({ error: 'Solo Ben10 puede activar aliens' });
-  // Aquí podrías marcar el alien como activo, o simplemente devolver éxito
-  res.json({ message: `Alien ${req.params.id} activado por Ben10` });
+  // Desactivar todos los aliens y activar solo el seleccionado
+  const aliens = getAllAliens();
+  const found = aliens.find(a => String(a.id) === String(req.params.id));
+  if (!found) return res.status(404).json({ error: 'Alien no encontrado' });
+  aliens.forEach(a => { a.isActive = false; });
+  found.isActive = true;
+  setAllAliens(aliens);
+  res.json({ message: `Alien ${found.name} activado por Ben10`, activeAlien: found });
 });
 
 // DELETE /api/aliens/:id

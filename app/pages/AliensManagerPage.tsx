@@ -6,10 +6,9 @@ import type { Alien } from '../types/alien';
 import { useAliens } from '../context/AliensContext';
 
 const categories = [
-  { label: 'Todos', value: 'all', count: 20 },
-  { label: 'Originales', value: 'original', count: 8 },
+  { label: 'Todos', value: 'all', count: 15 },
+  { label: 'Originales', value: 'original', count: 10 },
   { label: 'Alien Force', value: 'alienforce', count: 5 },
-  { label: 'Ultimatrix', value: 'ultimatrix', count: 7 },
 ];
 
 const habilidades = [
@@ -19,19 +18,31 @@ const habilidades = [
   'Control de fuego',
   'Estudio',
   'Favoritos',
-  'Activos',
+  'Activo', // Cambiado de 'Activos' a 'Activo'
 ];
 
 const AliensManagerPage: React.FC = () => {
   const { aliens, toggleFavorite } = useAliens();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedHabilidades, setSelectedHabilidades] = useState<string[]>([]);
+  const [selectedHabilidades, setSelectedHabilidades] = useState<string[]>([]); // Filtros aplicados
+  const [tempHabilidades, setTempHabilidades] = useState<string[]>([]); // Filtros temporales
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments] = useState(initialComments);
+  const [orderBy, setOrderBy] = useState('nombre-az');
+  const [showOrderMenu, setShowOrderMenu] = useState(false);
+
+  // Diccionario para mostrar el texto del filtro seleccionado
+  const orderLabels: Record<string, string> = {
+    'nombre-az': 'Nombre (A-Z)',
+    'nombre-za': 'Nombre (Z-A)',
+    'usos-desc': 'Veces usado (mayor a menor)',
+    'usos-asc': 'Veces usado (menor a mayor)',
+    'favoritos': 'Favoritos primero',
+  };
 
   const handleOpenModal = (alien: Alien) => {
     setSelectedAlien(alien);
@@ -56,6 +67,48 @@ const AliensManagerPage: React.FC = () => {
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const isSuperUser = user && user.isSuperUser;
+
+  // Filtrar por categoría
+  let filteredAliens = selectedCategory === 'all' ? aliens : aliens.filter(a => a.category === selectedCategory);
+
+  // Filtrar por habilidades, favoritos y activos
+  if (selectedHabilidades.length > 0) {
+    filteredAliens = filteredAliens.filter(alien => {
+      // Filtros especiales
+      const checks = selectedHabilidades.map(filtro => {
+        if (filtro === 'Favoritos') return alien.isFavorite;
+        if (filtro === 'Activo') return alien.isActive;
+        // Filtro por habilidad (en español o inglés)
+        const habilidades = alien.stats.abilities.map(h => h.toLowerCase());
+        if (filtro === 'Fuerza') return habilidades.some(h => h.includes('fuerza') || h.includes('strength'));
+        if (filtro === 'Velocidad') return habilidades.some(h => h.includes('velocidad') || h.includes('speed'));
+        if (filtro === 'Vuelo') return habilidades.some(h => h.includes('vuelo') || h.includes('flight'));
+        if (filtro === 'Control de fuego') return habilidades.some(h => h.includes('fuego') || h.includes('fire'));
+        if (filtro === 'Estudio') return habilidades.some(h => h.includes('estudio') || h.includes('intelligence') || h.includes('study'));
+        return true;
+      });
+      // Solo pasa si cumple todos los filtros seleccionados
+      return checks.every(Boolean);
+    });
+  }
+  // Ordenar aliens según la opción seleccionada
+  let sortedAliens = [...filteredAliens];
+  if (orderBy === 'nombre-az') {
+    sortedAliens.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (orderBy === 'nombre-za') {
+    sortedAliens.sort((a, b) => b.name.localeCompare(a.name));
+  } else if (orderBy === 'usos-desc') {
+    sortedAliens.sort((a, b) => b.stats.usageCount - a.stats.usageCount);
+  } else if (orderBy === 'usos-asc') {
+    sortedAliens.sort((a, b) => a.stats.usageCount - b.stats.usageCount);
+  } else if (orderBy === 'favoritos') {
+    sortedAliens.sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
+  }
+
+  // Al cambiar de categoría, sincronizar los filtros temporales con los aplicados
+  React.useEffect(() => {
+    setTempHabilidades(selectedHabilidades);
+  }, [selectedHabilidades, selectedCategory]);
 
   return (
     <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full">
@@ -89,21 +142,21 @@ const AliensManagerPage: React.FC = () => {
         </div>
         <div>
           <h3 className="font-bold mb-2 text-black">Filtros</h3>
-          <form className="space-y-1">
+          <form className="space-y-1" onSubmit={e => e.preventDefault()}>
             {habilidades.map(hab => (
               <label key={hab} className="flex items-center gap-2 text-black">
                 <input
                   type="checkbox"
-                  checked={selectedHabilidades.includes(hab)}
+                  checked={tempHabilidades.includes(hab)}
                   onChange={e => {
-                    if (e.target.checked) setSelectedHabilidades([...selectedHabilidades, hab]);
-                    else setSelectedHabilidades(selectedHabilidades.filter(h => h !== hab));
+                    if (e.target.checked) setTempHabilidades([...tempHabilidades, hab]);
+                    else setTempHabilidades(tempHabilidades.filter(h => h !== hab));
                   }}
                 />
                 {hab}
               </label>
             ))}
-            <button type="button" className="mt-2 w-full bg-green-600 text-white py-1 rounded hover:bg-green-700">Aplicar</button>
+            <button type="button" className="mt-2 w-full bg-green-600 text-white py-1 rounded hover:bg-green-700" onClick={() => setSelectedHabilidades(tempHabilidades)}>Aplicar</button>
           </form>
         </div>
       </aside>
@@ -113,13 +166,29 @@ const AliensManagerPage: React.FC = () => {
           <div className="flex gap-2 w-full sm:w-auto flex-wrap">
             <button className={`px-3 py-1 rounded ${view === 'grid' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`} onClick={() => setView('grid')}>Grid</button>
             <button className={`px-3 py-1 rounded ${view === 'list' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`} onClick={() => setView('list')}>Lista</button>
-            <button className="bg-green-600 text-white px-4 py-1 rounded font-semibold shadow hover:bg-green-700 transition">Ordenar por</button>
-            <button className="bg-green-600 text-white px-4 py-1 rounded font-semibold shadow hover:bg-green-700 transition">Filtros</button>
+            <div className="relative">
+              <button
+                className="bg-green-600 text-white px-4 py-1 rounded font-semibold shadow hover:bg-green-700 transition"
+                onClick={() => setShowOrderMenu((v) => !v)}
+                type="button"
+              >
+                Ordenar por: {orderLabels[orderBy]}
+              </button>
+              {showOrderMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 animate-fadeIn">
+                  <button className="w-full text-left px-4 py-2 text-gray-900 hover:bg-green-100 hover:text-green-700" onClick={() => { setOrderBy('nombre-az'); setShowOrderMenu(false); }}>Nombre (A-Z)</button>
+                  <button className="w-full text-left px-4 py-2 text-gray-900 hover:bg-green-100 hover:text-green-700" onClick={() => { setOrderBy('nombre-za'); setShowOrderMenu(false); }}>Nombre (Z-A)</button>
+                  <button className="w-full text-left px-4 py-2 text-gray-900 hover:bg-green-100 hover:text-green-700" onClick={() => { setOrderBy('usos-desc'); setShowOrderMenu(false); }}>Veces usado (mayor a menor)</button>
+                  <button className="w-full text-left px-4 py-2 text-gray-900 hover:bg-green-100 hover:text-green-700" onClick={() => { setOrderBy('usos-asc'); setShowOrderMenu(false); }}>Veces usado (menor a mayor)</button>
+                  <button className="w-full text-left px-4 py-2 text-gray-900 hover:bg-green-100 hover:text-green-700" onClick={() => { setOrderBy('favoritos'); setShowOrderMenu(false); }}>Favoritos primero</button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         {view === 'grid' ? (
           <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            {aliens.map(alien => (
+            {sortedAliens.map(alien => (
               <div key={alien.id} className="bg-white rounded-lg p-4 shadow flex flex-col gap-2 relative w-full max-w-full">
                 {alien.isFavorite && (
                   <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>
@@ -146,7 +215,7 @@ const AliensManagerPage: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {aliens.map(alien => (
+            {sortedAliens.map(alien => (
               <div key={alien.id} className="bg-white rounded-lg p-4 shadow flex flex-col sm:flex-row items-center gap-4 relative w-full max-w-full">
                 {alien.isFavorite && (
                   <span className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-xl">★</span>

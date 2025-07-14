@@ -99,11 +99,11 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
             <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">B</span>
+              <span className="text-white font-bold text-sm">{username.charAt(0).toUpperCase()}</span>
             </div>
             <div>
-              <p className="font-medium text-sm text-gray-900">Ben Tennyson</p>
-              <p className="text-xs text-gray-500">Portador del Omnitrix</p>
+              <p className="font-medium text-sm text-gray-900">{user?.username === 'ben10' ? 'Ben Tennyson' : username}</p>
+              <p className="text-xs text-gray-500">{user?.username === 'ben10' ? 'Portador del Omnitrix' : 'usuario'}</p>
             </div>
           </div>
         </div>

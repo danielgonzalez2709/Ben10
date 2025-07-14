@@ -13,6 +13,7 @@ export interface Alien {
   isFavorite: boolean;
   priority: number;
   isActive: boolean;
+  category: 'original' | 'alienforce' | 'ultimatrix';
 }
 
 export interface AlienStats {

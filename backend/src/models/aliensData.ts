@@ -11,6 +11,7 @@ export type Alien = {
     abilities: string[];
   };
   favorite?: boolean;
+  isActive?: boolean;
 };
 
 const DATA_PATH = path.join(__dirname, '../../data/aliens.json');
@@ -55,4 +56,8 @@ export function deleteAlien(id: string) {
   aliens = aliens.filter(a => a.id !== id);
   saveAliens(aliens);
   return alien;
+}
+
+export function setAllAliens(newAliens: Alien[]) {
+  saveAliens(newAliens);
 } 

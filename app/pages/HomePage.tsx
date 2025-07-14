@@ -5,13 +5,33 @@ import AlienPopup from '../components/aliens/AlienPopup';
 import type { Alien } from '../types/alien';
 
 const HomePage: React.FC = () => {
-  const { aliens, toggleFavorite } = useAliens();
-  const [activeAlienId, setActiveAlienId] = useState(aliens[1].id); // Por defecto XLR8
+  const { aliens, toggleFavorite, activateAlien } = useAliens();
+  if (!aliens || aliens.length === 0) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-green-100 to-white">
+        <span className="text-xl text-green-700 font-bold">Cargando aliens...</span>
+      </div>
+    );
+  }
+  // Buscar el alien activo globalmente
+  const globalActiveAlien = aliens.find(a => a.isActive) || aliens[0];
+  const [activeAlienId, setActiveAlienId] = useState(globalActiveAlien.id);
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isSuperUser = user?.username === 'ben10';
+
+  // Sincronizar el alien activo local con el global si cambia
+  React.useEffect(() => {
+    setActiveAlienId(globalActiveAlien.id);
+  }, [globalActiveAlien.id]);
 
   const activeAlien = aliens.find(a => a.id === activeAlienId) || aliens[0];
+
+  const handleActivate = () => {
+    activateAlien(activeAlienId);
+  };
 
   const handleOpenModal = (alien: Alien) => {
     setSelectedAlien(alien);
@@ -85,12 +105,14 @@ const HomePage: React.FC = () => {
                 <option key={a.id} value={a.id}>{a.name}</option>
               ))}
             </select>
-            <button
-              className="bg-green-600 text-white px-4 py-2 rounded-xl text-base font-bold shadow hover:bg-green-700 flex items-center gap-2 justify-center"
-              onClick={() => setActiveAlienId(activeAlienId)}
-            >
-              <span>🔄</span> Cambiar Alien
-            </button>
+            {isSuperUser && (
+              <button
+                className="bg-green-600 text-white px-4 py-2 rounded-xl text-base font-bold shadow hover:bg-green-700 flex items-center gap-2 justify-center"
+                onClick={handleActivate}
+              >
+                <span>⚡</span> Activar Alien
+              </button>
+            )}
             <button
               className="bg-gray-200 text-green-700 px-4 py-2 rounded-xl text-base font-bold shadow hover:bg-gray-300 flex items-center gap-2 justify-center"
               onClick={() => navigate(`/estadisticas?alienId=${activeAlienId}`)}

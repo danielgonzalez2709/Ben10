@@ -16,6 +16,7 @@ export const aliens: Alien[] = [
     isFavorite: true,
     priority: 1,
     isActive: false,
+    category: 'original',
   },
   {
     id: '2',
@@ -31,7 +32,8 @@ export const aliens: Alien[] = [
     },
     isFavorite: true,
     priority: 2,
-    isActive: false,
+    isActive: true,
+    category: 'original',
   },
   {
     id: '3',
@@ -48,6 +50,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 3,
     isActive: false,
+    category: 'original',
   },
   {
     id: '4',
@@ -64,6 +67,7 @@ export const aliens: Alien[] = [
     isFavorite: true,
     priority: 4,
     isActive: false,
+    category: 'original',
   },
   {
     id: '5',
@@ -80,6 +84,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 5,
     isActive: false,
+    category: 'original',
   },
   // Nuevos aliens agregados
   {
@@ -97,6 +102,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 6,
     isActive: false,
+    category: 'original',
   },
   {
     id: '7',
@@ -113,6 +119,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 7,
     isActive: false,
+    category: 'original',
   },
   {
     id: '8',
@@ -129,6 +136,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 8,
     isActive: false,
+    category: 'original',
   },
   {
     id: '9',
@@ -145,6 +153,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 9,
     isActive: false,
+    category: 'original',
   },
   {
     id: '10',
@@ -161,6 +170,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 10,
     isActive: false,
+    category: 'original',
   },
   {
     id: '11',
@@ -177,6 +187,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 11,
     isActive: false,
+    category: 'alienforce',
   },
   {
     id: '12',
@@ -193,6 +204,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 12,
     isActive: false,
+    category: 'alienforce',
   },
   {
     id: '13',
@@ -209,6 +221,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 13,
     isActive: false,
+    category: 'alienforce',
   },
   {
     id: '14',
@@ -225,6 +238,7 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 14,
     isActive: false,
+    category: 'alienforce',
   },
   {
     id: '15',
@@ -241,5 +255,6 @@ export const aliens: Alien[] = [
     isFavorite: false,
     priority: 15,
     isActive: false,
+    category: 'alienforce',
   },
 ]; 
