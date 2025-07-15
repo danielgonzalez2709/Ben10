@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Alien } from '../../types/alien';
 import type { Comment } from '../../types/comment';
-import AlienStats from './AlienStats';
 import Modal from '../Modal';
 import { useAliens } from '../../context/AliensContext';
 import { useNavigate } from 'react-router-dom';
@@ -29,15 +28,15 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
   onEditComment,
   onDeleteComment,
 }) => {
-  const { toggleFavorite } = useAliens();
+  const { activateAlien } = useAliens();
   const navigate = useNavigate();
   const [activateMsg, setActivateMsg] = React.useState<string | null>(null);
+
   if (!alien) return null;
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const isSuperUser = user && user.isSuperUser;
 
-  // Tomar el comentario más popular (más likes)
   const topComment = comments
     .filter((c) => !c.parentId)
     .sort((a, b) => b.likes - a.likes)[0];
@@ -49,29 +48,11 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
 
   const handleActivate = async () => {
     setActivateMsg(null);
-    if (!alien) return;
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setActivateMsg('No hay sesión activa');
-      return;
-    }
     try {
-      const res = await fetch(`http://localhost:3001/api/aliens/${alien.id}/activate`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setActivateMsg('¡Alien activado correctamente!');
-      } else {
-        setActivateMsg(data.error || 'Error al activar alien');
-      }
+      await activateAlien(alien.id);
+      setActivateMsg('¡Alien activado correctamente!');
     } catch (err) {
-      setActivateMsg('Error de conexión con el servidor');
+      setActivateMsg('Error al activar alien');
     }
   };
 
@@ -90,61 +71,67 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
             <span className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-yellow-100 rounded-full shadow text-yellow-400 text-2xl">★</span>
           )}
         </div>
+
         {/* Info y comentarios */}
         <div className="md:w-1/2 w-full flex flex-col justify-between p-6 md:p-4 gap-2">
           <div>
             <h2 className="text-3xl font-bold mb-4 text-gray-900">{alien.name}</h2>
+
             {/* Estadísticas */}
             <div className="mb-4">
               <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-lg font-bold text-black">Fuerza</span>
-                  <span className="text-lg font-bold text-black">{alien.stats.strength}/10</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                  <div className="bg-green-500 h-3 rounded-full" style={{ width: `${(alien.stats.strength / 10) * 100}%` }}></div>
-                </div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-lg font-bold text-black">Velocidad</span>
-                  <span className="text-lg font-bold text-black">{alien.stats.speed}/10</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                  <div className="bg-green-500 h-3 rounded-full" style={{ width: `${(alien.stats.speed / 10) * 100}%` }}></div>
-                </div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-lg font-bold text-black">Habilidades</span>
-                  <span className="text-lg font-bold text-black">{alien.stats.abilities.length}/10</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                  <div className="bg-green-500 h-3 rounded-full" style={{ width: `${(alien.stats.abilities.length / 10) * 100}%` }}></div>
-                </div>
+                {[
+                  { label: 'Fuerza', value: alien.stats.strength },
+                  { label: 'Velocidad', value: alien.stats.speed },
+                  { label: 'Habilidades', value: alien.stats.abilities.length },
+                ].map((stat, i) => (
+                  <React.Fragment key={i}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-lg font-bold text-black">{stat.label}</span>
+                      <span className="text-lg font-bold text-black">{stat.value}/10</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                      <div
+                        className="bg-green-500 h-3 rounded-full"
+                        style={{ width: `${(stat.value / 10) * 100}%` }}
+                      ></div>
+                    </div>
+                  </React.Fragment>
+                ))}
               </div>
+
               <button 
                 className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition w-full font-semibold"
                 onClick={() => window.location.href = `/estadisticas?alienId=${alien.id}`}
               >
                 Ver Estadísticas
               </button>
+
               {isSuperUser && (
-                <button
-                  className={`mb-4 px-4 py-2 w-full font-semibold rounded ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
-                  onClick={() => onFavoriteToggle()}
-                >
-                  {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
-                </button>
+                <>
+                  <button
+                    className={`mb-4 px-4 py-2 w-full font-semibold rounded ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    onClick={() => onFavoriteToggle()}
+                  >
+                    {alien.isFavorite ? 'Quitar de Favoritos' : 'Agregar a Favoritos'}
+                  </button>
+
+                  <button
+                    className="mb-4 px-4 py-2 w-full font-semibold rounded bg-green-600 text-white hover:bg-green-700"
+                    onClick={handleActivate}
+                  >
+                    Activar Alien
+                  </button>
+                </>
               )}
-              {isSuperUser && (
-                <button
-                  className="mb-4 px-4 py-2 w-full font-semibold rounded bg-green-600 text-white hover:bg-green-700"
-                  onClick={handleActivate}
-                >
-                  Activar Alien
-                </button>
-              )}
+
               {activateMsg && (
-                <div className="mb-2 text-center text-sm font-semibold text-green-700">{activateMsg}</div>
+                <div className="mb-2 text-center text-sm font-semibold text-green-700">
+                  {activateMsg}
+                </div>
               )}
             </div>
+
             {/* Comentario destacado */}
             <div className="bg-gray-50 rounded-lg p-4 shadow-inner mb-2">
               <h3 className="text-lg font-semibold mb-2 text-gray-800">Comentarios</h3>
@@ -152,12 +139,11 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
                 <div className="bg-white rounded-lg shadow p-3 mb-2">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-bold text-black">{topComment.userId}</span>
-                    <span className="text-gray-500 text-xs">hace {Math.floor((Date.now() - new Date(topComment.createdAt).getTime()) / (1000*60*60*24))} días</span>
+                    <span className="text-gray-500 text-xs">
+                      hace {Math.floor((Date.now() - new Date(topComment.createdAt).getTime()) / (1000 * 60 * 60 * 24))} días
+                    </span>
                   </div>
                   <div className="mb-1 text-gray-700 font-medium">{topComment.content}</div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                    <span className="font-semibold">{alien.name}</span>
-                  </div>
                   <div className="flex gap-4 text-gray-600 text-sm">
                     <span className="flex items-center gap-1">👍 {topComment.likes}</span>
                     <span className="flex items-center gap-1">💬 {respuestas} respuestas</span>
@@ -166,6 +152,7 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
               ) : (
                 <div className="text-gray-500">Sin comentarios aún.</div>
               )}
+
               <button
                 className="mt-2 px-4 py-3 bg-green-600 text-white rounded hover:bg-green-700 transition w-full font-bold flex items-center justify-center gap-2 text-lg shadow-lg border border-green-700"
                 onClick={handleVerComentarios}
@@ -180,4 +167,4 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
   );
 };
 
-export default AlienPopup; 
+export default AlienPopup;

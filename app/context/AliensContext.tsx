@@ -1,3 +1,4 @@
+// AliensContext.tsx
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import type { Alien } from '../types/alien';
 
@@ -17,23 +18,21 @@ export const useAliens = () => {
 };
 
 export const AliensProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [aliens, setAliens] = useState<Alien[]>([]); // Estado inicial vacío
+  const [aliens, setAliens] = useState<Alien[]>([]);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Función para cargar aliens desde el backend
   const fetchAliens = async () => {
     try {
       const res = await fetch('http://localhost:3001/api/aliens');
       const data = await res.json();
       setAliens(data);
     } catch (err) {
-      // Opcional: manejar error
+      console.error('Error al cargar aliens:', err);
     }
   };
 
-  // Polling cada 3 segundos
   useEffect(() => {
-    fetchAliens(); // Carga inicial
+    fetchAliens(); // carga inicial
     pollingRef.current = setInterval(fetchAliens, 3000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
@@ -41,12 +40,40 @@ export const AliensProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   const toggleFavorite = (id: string) => {
-    setAliens(prev => prev.map(a => a.id === id ? { ...a, isFavorite: !a.isFavorite } : a));
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Token no encontrado para marcar favorito');
+      return;
+    }
+
+    fetch(`http://localhost:3001/api/aliens/${id}/favorite`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(async res => {
+      if (!res.ok) {
+        const error = await res.json();
+        console.warn('No se pudo cambiar favorito:', error.message || error.error);
+        return;
+      }
+      await fetchAliens();
+    })
+    .catch(err => {
+      console.error('Error al cambiar favorito:', err);
+    });
   };
 
   const activateAlien = async (id: string) => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token no encontrado');
+        return;
+      }
+
       const res = await fetch(`http://localhost:3001/api/aliens/${id}/activate`, {
         method: 'PUT',
         headers: {
@@ -54,14 +81,17 @@ export const AliensProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           'Authorization': `Bearer ${token}`
         }
       });
-      if (res.ok) {
-        // Actualizar el estado local inmediatamente
-        setAliens(prev => prev.map(a => ({ ...a, isActive: a.id === id })));
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.warn('No se pudo activar el alien:', error.message || error.error);
+        return;
       }
-      // Refrescar desde el backend después de un pequeño delay
-      setTimeout(fetchAliens, 300);
+
+      // Recarga los aliens desde backend para obtener el real isActive actualizado
+      await fetchAliens();
     } catch (err) {
-      // Opcional: manejar error
+      console.error('Error al activar alien:', err);
     }
   };
 
@@ -70,4 +100,4 @@ export const AliensProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       {children}
     </AliensContext.Provider>
   );
-}; 
+};

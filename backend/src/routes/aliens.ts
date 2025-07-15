@@ -1,9 +1,15 @@
 import { Router } from 'express';
-import { getAllAliens, getAlienById, addAlien, updateAlien, deleteAlien, Alien, setAllAliens } from '../models/aliensData';
+import {
+  getAllAliens,
+  getAlienById,
+  addAlien,
+  updateAlien,
+  deleteAlien,
+  Alien,
+  setAllAliens,
+} from '../models/aliensData';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticateJWT, AuthRequest } from '../middleware/auth';
-import fs from 'fs';
-import path from 'path';
 
 const router = Router();
 
@@ -14,21 +20,25 @@ router.get('/', (req, res) => {
 
   // Filtro por nombre
   if (typeof name === 'string' && name.trim() !== '') {
-    aliens = aliens.filter(a => a.name.toLowerCase().includes(name.toLowerCase()));
+    aliens = aliens.filter(a =>
+      a.name.toLowerCase().includes(name.toLowerCase())
+    );
   }
 
-  // Ordenamiento
+  // Ordenamiento por campos normales o dentro de stats
   if (typeof sort === 'string') {
     aliens = aliens.sort((a, b) => {
       let valA: any = a[sort as keyof Alien];
       let valB: any = b[sort as keyof Alien];
-      // Si es stats, permite ordenar por fuerza o velocidad
+
       if (sort === 'strength' || sort === 'speed') {
         valA = a.stats[sort];
         valB = b.stats[sort];
       }
+
       if (typeof valA === 'string') valA = valA.toLowerCase();
       if (typeof valB === 'string') valB = valB.toLowerCase();
+
       if (valA < valB) return order === 'desc' ? 1 : -1;
       if (valA > valB) return order === 'desc' ? -1 : 1;
       return 0;
@@ -47,15 +57,20 @@ router.get('/:id', (req, res) => {
 
 // POST /api/aliens
 router.post('/', (req, res) => {
-  const { name, image, stats, favorite } = req.body;
+  const { name, image, stats, favorite, isActive, priority, category } = req.body;
   if (!name || !stats) return res.status(400).json({ error: 'Faltan datos requeridos' });
+
   const newAlien: Alien = {
     id: uuidv4(),
     name,
     image: image || '',
     stats,
-    favorite: !!favorite
+    isFavorite: !!favorite,
+    isActive: !!isActive,
+    priority: priority ?? 5,
+    category: category || 'default',
   };
+
   addAlien(newAlien);
   res.status(201).json(newAlien);
 });
@@ -69,23 +84,33 @@ router.put('/:id', (req, res) => {
 
 // PUT /api/aliens/:id/favorite
 router.put('/:id/favorite', authenticateJWT, (req: AuthRequest, res) => {
-  if (!req.user?.isSuperUser) return res.status(403).json({ error: 'Solo Ben10 puede marcar favoritos' });
-  const updated = updateAlien(req.params.id, { favorite: true });
+  if (!req.user?.isSuperUser)
+    return res.status(403).json({ error: 'Solo Ben10 puede marcar favoritos' });
+
+  const updated = updateAlien(req.params.id, { isFavorite: true });
   if (!updated) return res.status(404).json({ error: 'Alien no encontrado' });
   res.json(updated);
 });
 
 // PUT /api/aliens/:id/activate
 router.put('/:id/activate', authenticateJWT, (req: AuthRequest, res) => {
-  if (!req.user?.isSuperUser) return res.status(403).json({ error: 'Solo Ben10 puede activar aliens' });
-  // Desactivar todos los aliens y activar solo el seleccionado
+  if (!req.user?.isSuperUser)
+    return res.status(403).json({ error: 'Solo Ben10 puede activar aliens' });
+
   const aliens = getAllAliens();
   const found = aliens.find(a => String(a.id) === String(req.params.id));
   if (!found) return res.status(404).json({ error: 'Alien no encontrado' });
-  aliens.forEach(a => { a.isActive = false; });
+
+  aliens.forEach(a => {
+    a.isActive = false;
+  });
+
   found.isActive = true;
   setAllAliens(aliens);
-  res.json({ message: `Alien ${found.name} activado por Ben10`, activeAlien: found });
+  res.json({
+    message: `Alien ${found.name} activado por Ben10`,
+    activeAlien: found,
+  });
 });
 
 // DELETE /api/aliens/:id
@@ -95,4 +120,4 @@ router.delete('/:id', (req, res) => {
   res.json(deleted);
 });
 
-export default router; 
+export default router;

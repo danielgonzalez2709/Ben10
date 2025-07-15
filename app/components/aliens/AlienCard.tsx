@@ -9,20 +9,23 @@ interface AlienCardProps {
 
 const AlienCard: React.FC<AlienCardProps> = ({ alien, onClick, onFavoriteToggle }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const isSuperUser = user && user.isSuperUser;
+  const isSuperUser = !!user?.isSuperUser;
+
   return (
-    <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] group"
+    <div
+      className={`rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-200 group 
+        ${alien.isActive ? 'ring-4 ring-green-400 bg-green-50 hover:scale-[1.03]' : 'bg-white hover:scale-[1.01]'} 
+      `}
       onClick={onClick}
     >
       <div className="relative">
-        <img 
-          src={alien.image} 
+        <img
+          src={alien.image}
           alt={alien.name}
           className="w-full h-48 sm:h-52 object-cover group-hover:scale-105 transition-transform duration-200"
         />
-        
-        {/* Botón de favorito solo para Ben10 */}
+
+        {/* Botón de favorito solo para superusuarios */}
         {isSuperUser && (
           <button
             onClick={(e) => {
@@ -37,14 +40,10 @@ const AlienCard: React.FC<AlienCardProps> = ({ alien, onClick, onFavoriteToggle 
         )}
 
         {/* Indicador de alien activo */}
-        {alien.isActive && (
-          <div className="absolute top-2 left-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-            ACTIVO
-          </div>
-        )}
+
 
         {/* Indicador de prioridad */}
-        {alien.priority <= 3 && (
+        {typeof alien.priority === 'number' && alien.priority <= 3 && (
           <div className="absolute bottom-2 left-2 px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
             PRIORIDAD {alien.priority}
           </div>
@@ -84,7 +83,7 @@ const AlienCard: React.FC<AlienCardProps> = ({ alien, onClick, onFavoriteToggle 
         {/* Habilidades principales */}
         <div className="flex flex-wrap gap-1">
           {alien.stats.abilities.slice(0, 2).map((ability, index) => (
-            <span 
+            <span
               key={index}
               className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
             >
@@ -102,4 +101,4 @@ const AlienCard: React.FC<AlienCardProps> = ({ alien, onClick, onFavoriteToggle 
   );
 };
 
-export default AlienCard; 
+export default AlienCard;
