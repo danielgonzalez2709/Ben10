@@ -36,29 +36,57 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (!registerData.username || !registerData.password || !registerData.name) {
-      setError('Completa todos los campos');
-      return;
-    }
-    try {
-      const res = await fetch('http://localhost:3001/api/users/register', {
+const handleRegister = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+
+  if (!registerData.username || !registerData.password || !registerData.name) {
+    setError('Completa todos los campos');
+    return;
+  }
+
+  try {
+    // 1. Registrar usuario
+    const res = await fetch('http://localhost:3001/api/users/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: registerData.username,
+        password: registerData.password,
+        name: registerData.name,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // 2. Login automático después de registrarse
+      const loginRes = await fetch('http://localhost:3001/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: registerData.username, password: registerData.password }),
+        body: JSON.stringify({
+          username: registerData.username,
+          password: registerData.password,
+        }),
       });
-      const data = await res.json();
-      if (res.ok) {
+
+      const loginData = await loginRes.json();
+
+      if (loginRes.ok) {
+        // 3. Guardar usuario y token
+        localStorage.setItem('user', JSON.stringify(loginData.user));
+        localStorage.setItem('token', loginData.token);
         navigate('/');
       } else {
-        setError(data.error || 'Error al registrarse');
+        setError('Registro exitoso, pero error al iniciar sesión automáticamente');
       }
-    } catch (err) {
-      setError('Error de conexión con el servidor');
+    } else {
+      setError(data.error || 'Error al registrarse');
     }
-  };
+  } catch (err) {
+    setError('Error de conexión con el servidor');
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-300">

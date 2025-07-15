@@ -16,5 +16,47 @@
     "username": "josedavidgonzalezh",
     "password": "12345",
     "createdAt": "2025-07-14T21:48:49.065Z"
+  },
+  {
+    "id": "9755b2ce-444a-46b2-8775-9a8891fc573c",
+    "username": "petro123",
+    "password": "123",
+    "createdAt": "2025-07-15T17:27:26.582Z"
+  },
+  {
+    "id": "497a8d0b-e90a-49da-b980-741ba51672e8",
+    "username": "uribe123",
+    "password": "123",
+    "createdAt": "2025-07-15T17:28:55.175Z"
+  },
+  {
+    "id": "1af6ec30-1e7c-4a47-a72e-d1114c2967aa",
+    "username": "maduro123",
+    "password": "123",
+    "createdAt": "2025-07-15T17:40:07.991Z"
+  },
+  {
+    "id": "fd6515e6-56be-423e-bb79-143c23d0c57e",
+    "username": "max123",
+    "password": "123",
+    "createdAt": "2025-07-15T18:10:45.302Z"
+  },
+  {
+    "id": "08722078-2071-463a-87a0-9db906f17dc9",
+    "username": "prueba123",
+    "password": "123",
+    "createdAt": "2025-07-15T18:20:01.277Z"
+  },
+  {
+    "id": "bddd7a16-1a9d-4cd8-90e3-a24ce24a5990",
+    "username": "preuba2",
+    "password": "123",
+    "createdAt": "2025-07-15T18:23:10.806Z"
+  },
+  {
+    "id": "b642c858-80dc-4f78-8570-9d69ec9a53b0",
+    "username": "usuariox",
+    "password": "123",
+    "createdAt": "2025-07-15T18:26:27.416Z"
   }
 ]
