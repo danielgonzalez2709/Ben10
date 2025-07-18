@@ -33,4 +33,11 @@ router.post('/login', (req, res) => {
   res.json({ message: 'Login exitoso', user: { id: user.id, username: user.username, isSuperUser }, token });
 });
 
+// GET /api/users
+router.get('/', (req, res) => {
+  const users = getAllUsers();
+  // Solo devolvemos id y username por seguridad
+  res.json(users.map(u => ({ id: u.id, username: u.username })));
+});
+
 export default router; 

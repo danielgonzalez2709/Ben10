@@ -4,6 +4,7 @@ import type { Comment } from '../../types/comment';
 import Modal from '../Modal';
 import { useAliens } from '../../context/AliensContext';
 import { useNavigate } from 'react-router-dom';
+import CommentList from '../comments/CommentList';
 
 interface AlienPopupProps {
   isOpen: boolean;
@@ -135,24 +136,22 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
             {/* Comentario destacado */}
             <div className="bg-gray-50 rounded-lg p-4 shadow-inner mb-2">
               <h3 className="text-lg font-semibold mb-2 text-gray-800">Comentarios</h3>
-              {topComment ? (
+              {comments && comments.length > 0 ? (
                 <div className="bg-white rounded-lg shadow p-3 mb-2">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-black">{topComment.userId}</span>
+                    <span className="font-bold text-black">{comments[0].userId}</span>
                     <span className="text-gray-500 text-xs">
-                      hace {Math.floor((Date.now() - new Date(topComment.createdAt).getTime()) / (1000 * 60 * 60 * 24))} días
+                      {new Date(comments[0].createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="mb-1 text-gray-700 font-medium">{topComment.content}</div>
+                  <div className="mb-1 text-gray-700 font-medium">{comments[0].content}</div>
                   <div className="flex gap-4 text-gray-600 text-sm">
-                    <span className="flex items-center gap-1">👍 {topComment.likes}</span>
-                    <span className="flex items-center gap-1">💬 {respuestas} respuestas</span>
+                    <span className="flex items-center gap-1">👍 {comments[0].likes}</span>
                   </div>
                 </div>
               ) : (
                 <div className="text-gray-500">Sin comentarios aún.</div>
               )}
-
               <button
                 className="mt-2 px-4 py-3 bg-green-600 text-white rounded hover:bg-green-700 transition w-full font-bold flex items-center justify-center gap-2 text-lg shadow-lg border border-green-700"
                 onClick={handleVerComentarios}

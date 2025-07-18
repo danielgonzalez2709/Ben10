@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAliens } from '../context/AliensContext';
 import AlienPopup from '../components/aliens/AlienPopup';
 import type { Alien } from '../types/alien';
+import type { Comment } from '../types/comment';
 
 const HomePage: React.FC = () => {
   const { aliens, toggleFavorite, activateAlien } = useAliens();
@@ -12,6 +13,8 @@ const HomePage: React.FC = () => {
   const [selectedAlienId, setSelectedAlienId] = useState(globalActiveAlien?.id || '');
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const isSuperUser = user?.username === 'ben10';
@@ -45,6 +48,62 @@ const HomePage: React.FC = () => {
   const onLikeComment = () => {};
   const onEditComment = () => {};
   const onDeleteComment = () => {};
+
+  // Cargar comentarios cuando se abre el modal y cambia el alien seleccionado
+  useEffect(() => {
+    if (isModalOpen && selectedAlien) {
+      setLoadingComments(true);
+      fetch(`/api/comments?alienId=${selectedAlien.id}`)
+        .then(res => res.json())
+        .then(data => setComments(data))
+        .finally(() => setLoadingComments(false));
+    } else {
+      setComments([]);
+    }
+  }, [isModalOpen, selectedAlien]);
+
+  const handleAddComment = async (content: string, parentId?: string) => {
+    if (!selectedAlien || !user?.id) return;
+    const body = {
+      alienId: selectedAlien.id,
+      userId: user.id,
+      text: content,
+      parentId,
+    };
+    const res = await fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      const newComment = await res.json();
+      setComments(prev => [newComment, ...prev]);
+    }
+  };
+
+  const handleLikeComment = async (commentId: string) => {
+    // Aquí deberías tener un endpoint para likes, por ahora solo simula
+    setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes: c.likes + 1 } : c));
+  };
+
+  const handleEditComment = async (commentId: string, content: string) => {
+    const res = await fetch(`/api/comments/${commentId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: content }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, ...updated } : c));
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    const res = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' });
+    if (res.ok) {
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    }
+  };
 
   if (!aliens || aliens.length === 0) {
     return (
@@ -109,6 +168,7 @@ const HomePage: React.FC = () => {
               className="border rounded px-3 py-1 bg-gray-100 text-black text-base font-semibold shadow"
               value={selectedAlienId}
               onChange={e => setSelectedAlienId(e.target.value)}
+              disabled={!isSuperUser}
             >
               {aliens.map(a => (
                 <option key={a.id} value={a.id}>{a.name}</option>
@@ -137,12 +197,12 @@ const HomePage: React.FC = () => {
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           alien={selectedAlien}
-          comments={[]}
+          comments={comments}
           onFavoriteToggle={onFavoriteToggle}
-          onAddComment={onAddComment}
-          onLikeComment={onLikeComment}
-          onEditComment={onEditComment}
-          onDeleteComment={onDeleteComment}
+          onAddComment={handleAddComment}
+          onLikeComment={handleLikeComment}
+          onEditComment={handleEditComment}
+          onDeleteComment={handleDeleteComment}
         />
       </div>
     </div>

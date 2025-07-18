@@ -10,18 +10,7 @@ const TABS = [
   { label: 'Mis comentarios', value: 'mine', icon: '👤' },
 ];
 
-// Datos simulados
-const users = {
-  '1': 'Gwen Tennyson',
-  '2': 'Kevin Levin',
-  '3': 'Ben Tennyson',
-} as const;
-
-const userAvatars: Record<string, string> = {
-  '1': '/images/gwen.jpg',
-  '2': '/images/kevin.jpg',
-  '3': '/images/ben.jpg',
-};
+// Elimina el objeto users simulado y avatars
 
 const initialComments: Comment[] = [
   {
@@ -71,8 +60,32 @@ const initialComments: Comment[] = [
   },
 ];
 
-// Simulación de usuario actual
-const currentUserId = '1';
+// Reemplaza la simulación de usuario actual:
+// const currentUserId = '1';
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+const currentUserId = user?.id || '';
+
+// Función para anidar comentarios
+function nestComments(comments: Comment[]): Comment[] {
+  const map = new Map<string, Comment & { replies: Comment[] }>();
+  const roots: (Comment & { replies: Comment[] })[] = [];
+  // Inicializa el mapa
+  comments.forEach(comment => {
+    map.set(comment.id, { ...comment, replies: [] });
+  });
+  // Anida recursivamente
+  map.forEach(comment => {
+    if (comment.parentId) {
+      const parent = map.get(comment.parentId);
+      if (parent) {
+        parent.replies.push(comment);
+      }
+    } else {
+      roots.push(comment);
+    }
+  });
+  return roots;
+}
 
 const ComentariosPage: React.FC = () => {
   const location = useLocation();
@@ -85,6 +98,19 @@ const ComentariosPage: React.FC = () => {
   const [replyText, setReplyText] = useState('');
   const [userLikes, setUserLikes] = useState<{ [id: string]: boolean }>({});
   const [filterAlien, setFilterAlien] = useState('all');
+  const [userMap, setUserMap] = useState<Record<string, string>>({});
+  // En ComentariosPage, agrega un estado para controlar qué comentario está expandido:
+  const [expandedComment, setExpandedComment] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/users')
+      .then(res => res.json())
+      .then((users: any[]) => {
+        const map: Record<string, string> = {};
+        users.forEach(u => { map[u.id] = u.username; });
+        setUserMap(map);
+      });
+  }, []);
 
   // Leer alienId de la query string
   useEffect(() => {
@@ -95,15 +121,17 @@ const ComentariosPage: React.FC = () => {
     }
   }, [location.search]);
 
-  // Filtrar comentarios según el tab y alien seleccionado
-  let filtered = comments;
-  
+  // 1. NO filtres el array plano antes de anidar. Usa todos los comentarios para anidar.
+  const allNested = nestComments(comments);
+  // 2. Filtra solo los comentarios raíz después de anidar:
+  let filtered: Comment[] = allNested;
+
   if (tab === 'popular') {
-    filtered = [...comments].sort((a, b) => b.likes - a.likes);
+    filtered = [...allNested].sort((a, b) => b.likes - a.likes);
   } else if (tab === 'recent') {
-    filtered = [...comments].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    filtered = [...allNested].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } else if (tab === 'mine') {
-    filtered = comments.filter(c => c.userId === currentUserId);
+    filtered = allNested.filter(c => c.userId === currentUserId);
   }
 
   if (filterAlien !== 'all') {
@@ -151,8 +179,8 @@ const ComentariosPage: React.FC = () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       isEdited: false,
-      replies: [],
       parentId: parentId,
+      replies: [],
     });
     setReplyTo(null);
     setReplyText('');
@@ -171,6 +199,8 @@ const ComentariosPage: React.FC = () => {
     const diffInWeeks = Math.floor(diffInDays / 7);
     return `Hace ${diffInWeeks} semana${diffInWeeks > 1 ? 's' : ''}`;
   };
+
+  const nestedComments = nestComments(filtered);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 p-4">
@@ -299,7 +329,7 @@ const ComentariosPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 border border-gray-400 rounded bg-white text-gray-700 hover:bg-gray-100 font-semibold"
+                  className="px-4 py-2 border border-gray-400 rounded bg-white text-black font-bold hover:bg-gray-200"
                 >
                   Cancelar
                 </button>
@@ -324,137 +354,160 @@ const ComentariosPage: React.FC = () => {
           </div>
         ) : (
           filtered.map((comment) => (
-            <div key={comment.id} className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-start gap-3 mb-3">
-                <img
-                  src={userAvatars[comment.userId as keyof typeof userAvatars] || '/images/default-avatar.png'}
-                  alt={users[comment.userId as keyof typeof users] || 'Usuario'}
-                  className="w-10 h-10 rounded-full object-cover border border-gray-300"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-gray-900">
-                      {users[comment.userId as keyof typeof users] || 'Usuario'}
-                    </span>
-                    <span className="text-gray-500 text-sm">
-                      {formatTimeAgo(comment.createdAt)}
-                    </span>
-                    {comment.isEdited && (
-                      <span className="text-xs text-gray-400">(editado)</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="font-medium">Alien:</span>
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
-                      {aliens.find(a => a.id === comment.alienId)?.name}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mb-4 text-gray-800 leading-relaxed">
-                {comment.content}
-              </div>
-              
-              <div className="flex items-center gap-4 text-sm">
-                <button
-                  onClick={() => handleLike(comment.id)}
-                  className={`flex items-center gap-1 font-medium transition-colors ${
-                    userLikes[comment.id] 
-                      ? 'text-green-600' 
-                      : 'text-gray-600 hover:text-green-600'
-                  }`}
-                >
-                  <span>{userLikes[comment.id] ? '💚' : '👍'}</span>
-                  {comment.likes}
-                </button>
-                
-                <button 
-                  onClick={() => handleShowReply(comment.id)}
-                  className="flex items-center gap-1 text-gray-600 hover:text-green-600 font-medium"
-                >
-                  <span>💬</span>
-                  {comment.replies?.length || 0} respuestas
-                </button>
-              </div>
-
-              {/* Formulario de respuesta */}
-              {replyTo === comment.id && (
-                <form onSubmit={e => handleAddReply(e, comment.id)} className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <textarea
-                    value={replyText}
-                    onChange={e => setReplyText(e.target.value)}
-                    placeholder="Escribe tu respuesta..."
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 mb-3"
-                    required
-                  />
-                  <div className="flex gap-2">
-                    <button 
-                      type="submit" 
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium"
-                    >
-                      Responder
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={() => setReplyTo(null)}
-                      className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* Respuestas */}
-              {comment.replies && comment.replies.length > 0 && (
-                <div className="mt-4 space-y-3">
-                  {comment.replies.map((reply) => (
-                    <div key={reply.id} className="bg-gray-50 rounded-lg p-4 ml-6">
-                      <div className="flex items-start gap-3 mb-2">
-                        <img
-                          src={userAvatars[reply.userId as keyof typeof userAvatars] || '/images/default-avatar.png'}
-                          alt={users[reply.userId as keyof typeof users] || 'Usuario'}
-                          className="w-8 h-8 rounded-full object-cover border border-gray-300"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900">
-                              {users[reply.userId as keyof typeof users] || 'Usuario'}
-                            </span>
-                            <span className="text-gray-500 text-sm">
-                              {formatTimeAgo(reply.createdAt)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-3 text-gray-800">
-                        {reply.content}
-                      </div>
-                      
-                      <button
-                        onClick={() => handleLike(reply.id)}
-                        className={`flex items-center gap-1 text-sm font-medium ${
-                          userLikes[reply.id] 
-                            ? 'text-green-600' 
-                            : 'text-gray-600 hover:text-green-600'
-                        }`}
-                      >
-                        <span>{userLikes[reply.id] ? '💚' : '👍'}</span>
-                        {reply.likes}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              userMap={userMap}
+              formatTimeAgo={formatTimeAgo}
+              handleLike={handleLike}
+              userLikes={userLikes}
+              replyTo={replyTo}
+              setReplyTo={setReplyTo}
+              replyText={replyText}
+              setReplyText={setReplyText}
+              handleAddReply={handleAddReply}
+              expandedComment={expandedComment}
+              setExpandedComment={setExpandedComment}
+            />
           ))
         )}
       </div>
     </div>
   );
 };
+
+function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, replyTo, setReplyTo, replyText, setReplyText, handleAddReply, expandedComment, setExpandedComment }: {
+  comment: Comment,
+  userMap: Record<string, string>,
+  formatTimeAgo: (date: Date) => string,
+  handleLike: (id: string) => void,
+  userLikes: { [id: string]: boolean },
+  replyTo: string | null,
+  setReplyTo: (id: string | null) => void,
+  replyText: string,
+  setReplyText: (text: string) => void,
+  handleAddReply: (e: React.FormEvent, parentId: string) => void,
+  expandedComment: string | null,
+  setExpandedComment: (id: string | null) => void
+}) {
+  const isExpanded = expandedComment === comment.id;
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 mb-4">
+      <div className="flex items-start gap-3 mb-3">
+        <img
+          src={'/images/default-avatar.png'}
+          alt={userMap[comment.userId] || comment.userId}
+          className="w-10 h-10 rounded-full object-cover border border-gray-300"
+        />
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-semibold text-gray-900">
+              {userMap[comment.userId] || comment.userId}
+            </span>
+            <span className="text-gray-500 text-sm">
+              {formatTimeAgo(comment.createdAt)}
+            </span>
+            {comment.isEdited && (
+              <span className="text-xs text-gray-400">(editado)</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">Alien:</span>
+            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+              {aliens.find(a => a.id === comment.alienId)?.name}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mb-4 text-gray-800 leading-relaxed">
+        {comment.content}
+      </div>
+      
+      <div className="flex items-center gap-4 text-sm">
+        <button
+          onClick={() => handleLike(comment.id)}
+          className={`flex items-center gap-1 font-medium transition-colors ${
+            userLikes[comment.id] 
+              ? 'text-green-600' 
+              : 'text-gray-600 hover:text-green-600'
+          }`}
+        >
+          <span>{userLikes[comment.id] ? '💚' : '👍'}</span>
+          {comment.likes}
+        </button>
+        
+        {comment.replies && comment.replies.length > 1 ? (
+          <button
+            onClick={() => setExpandedComment(isExpanded ? null : comment.id)}
+            className="flex items-center gap-1 text-gray-600 hover:text-green-600 font-medium"
+          >
+            {isExpanded ? 'Ver menos' : `Ver ${comment.replies.length} respuestas`}
+          </button>
+        ) : comment.replies && comment.replies.length === 1 ? null : (
+          <button
+            onClick={() => setReplyTo(comment.id)}
+            className="flex items-center gap-1 text-gray-600 hover:text-green-600 font-medium"
+          >
+            <span>💬</span>
+            Responder
+          </button>
+        )}
+      </div>
+
+      {/* Formulario de respuesta */}
+      {replyTo === comment.id && (
+        <form onSubmit={e => handleAddReply(e, comment.id)} className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <textarea
+            value={replyText}
+            onChange={e => setReplyText(e.target.value)}
+            placeholder="Escribe tu respuesta..."
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 mb-3"
+            required
+          />
+          <div className="flex gap-2">
+            <button 
+              type="submit" 
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium"
+            >
+              Responder
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setReplyTo(null)}
+              className="px-4 py-2 border border-gray-300 rounded bg-white text-black font-bold hover:bg-gray-200"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Respuestas anidadas */}
+      {isExpanded && comment.replies && comment.replies.length > 0 && (
+        <div className="mt-4 space-y-3 ml-6">
+          {comment.replies.map(reply => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              userMap={userMap}
+              formatTimeAgo={formatTimeAgo}
+              handleLike={handleLike}
+              userLikes={userLikes}
+              replyTo={replyTo}
+              setReplyTo={setReplyTo}
+              replyText={replyText}
+              setReplyText={setReplyText}
+              handleAddReply={handleAddReply}
+              expandedComment={expandedComment}
+              setExpandedComment={setExpandedComment}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default ComentariosPage; 
