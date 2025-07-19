@@ -50,52 +50,50 @@ const AlienCard: React.FC<AlienCardProps> = ({ alien, onClick, onFavoriteToggle 
         )}
       </div>
 
-      <div className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{alien.name}</h3>
-          <span className="text-xs text-gray-500">#{alien.id}</span>
-        </div>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{alien.name}</h3>
+        <span className="text-xs text-gray-500">#{alien.id}</span>
+      </div>
 
-        {/* Estadísticas principales */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-red-500">💪</span>
-            <div>
-              <div className="font-medium text-gray-900">Fuerza</div>
-              <div className="text-gray-600">{alien.stats.strength}/10</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-blue-500">⚡</span>
-            <div>
-              <div className="font-medium text-gray-900">Velocidad</div>
-              <div className="text-gray-600">{alien.stats.speed}/10</div>
-            </div>
+      {/* Estadísticas principales */}
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-red-500">💪</span>
+          <div>
+            <div className="font-medium text-gray-900">Fuerza</div>
+            <div className="text-gray-600">{alien.stats.strength}/10</div>
           </div>
         </div>
-
-        {/* Estadísticas adicionales */}
-        <div className="flex justify-between text-xs text-gray-500 border-t pt-2">
-          <span>Uso: {alien.stats.usageCount}</span>
-          <span>Comentarios: {alien.stats.commentCount}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-blue-500">⚡</span>
+          <div>
+            <div className="font-medium text-gray-900">Velocidad</div>
+            <div className="text-gray-600">{alien.stats.speed}/10</div>
+          </div>
         </div>
+      </div>
 
-        {/* Habilidades principales */}
-        <div className="flex flex-wrap gap-1">
-          {alien.stats.abilities.slice(0, 2).map((ability, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-            >
-              {ability}
-            </span>
-          ))}
-          {alien.stats.abilities.length > 2 && (
-            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-              +{alien.stats.abilities.length - 2} más
-            </span>
-          )}
-        </div>
+      {/* Estadísticas adicionales */}
+      <div className="flex justify-between text-xs text-gray-500 border-t pt-2">
+        <span>Uso: {alien.stats.usageCount}</span>
+        <span>Comentarios: {alien.stats.commentCount}</span>
+      </div>
+
+      {/* Habilidades principales */}
+      <div className="flex flex-wrap gap-1">
+        {alien.stats.abilities.slice(0, 2).map((ability, index) => (
+          <span
+            key={index}
+            className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
+          >
+            {ability}
+          </span>
+        ))}
+        {alien.stats.abilities.length > 2 && (
+          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+            +{alien.stats.abilities.length - 2} más
+          </span>
+        )}
       </div>
     </div>
   );

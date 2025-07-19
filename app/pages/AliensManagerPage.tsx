@@ -199,9 +199,6 @@ const AliensManagerPage: React.FC = () => {
                 <div className="flex flex-col gap-2 mt-auto w-full">
                   <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm w-full" onClick={() => handleOpenModal(alien)}>Ver</button>
                   {isSuperUser && (
-                    <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full">Activar</button>
-                  )}
-                  {isSuperUser && (
                     <button
                       className={`px-3 py-1 rounded text-sm w-full ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
                       onClick={() => toggleFavorite(alien.id)}
@@ -227,9 +224,6 @@ const AliensManagerPage: React.FC = () => {
                 </div>
                 <div className="flex flex-col gap-2 w-full sm:w-auto">
                   <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm w-full sm:w-auto" onClick={() => handleOpenModal(alien)}>Ver</button>
-                  {isSuperUser && (
-                    <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 text-sm w-full sm:w-auto">Activar</button>
-                  )}
                   {isSuperUser && (
                     <button
                       className={`px-3 py-1 rounded text-sm w-full sm:w-auto ${alien.isFavorite ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'}`}
