@@ -33,7 +33,7 @@ router.get('/', (req, res) => {
 
 // POST /api/comments
 router.post('/', (req, res) => {
-  const { alienId, userId, text } = req.body;
+  const { alienId, userId, text, parentId } = req.body;
   if (!alienId || !userId || !text) return res.status(400).json({ error: 'Faltan datos requeridos' });
   const newComment: Comment = {
     id: uuidv4(),
@@ -41,7 +41,8 @@ router.post('/', (req, res) => {
     userId,
     text,
     date: new Date().toISOString(),
-    likes: 0
+    likes: 0,
+    ...(parentId ? { parentId } : {})
   };
   addComment(newComment);
   res.status(201).json(newComment);

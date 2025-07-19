@@ -4,7 +4,7 @@ import CommentForm from './CommentForm';
 
 interface CommentListProps {
   comments: Comment[];
-  onAddComment: (content: string, parentId?: string) => void;
+  onAddComment: (comment: Comment) => void;
   onLikeComment: (commentId: string) => void;
   onEditComment: (commentId: string, content: string) => void;
   onDeleteComment: (commentId: string) => void;
@@ -17,6 +17,8 @@ const CommentList: React.FC<CommentListProps> = ({
   onEditComment,
   onDeleteComment,
 }) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const alienId = comments[0]?.alienId || '';
   const renderComment = (comment: Comment, level: number = 0) => {
     return (
       <div key={comment.id} className={`ml-${level * 4} mb-4`}>
@@ -51,8 +53,11 @@ const CommentList: React.FC<CommentListProps> = ({
           </div>
           <p className="text-gray-700 mb-2">{comment.content}</p>
           <CommentForm
-            onSubmit={(content) => onAddComment(content, comment.id)}
+            onSubmit={onAddComment}
             placeholder="Responder a este comentario..."
+            parentId={comment.id}
+            alienId={comment.alienId}
+            userId={comment.userId}
           />
           {comment.replies && comment.replies.length > 0 && (
             <div className="mt-4">
@@ -67,7 +72,7 @@ const CommentList: React.FC<CommentListProps> = ({
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold mb-4">Comentarios</h3>
-      <CommentForm onSubmit={(content) => onAddComment(content)} />
+      <CommentForm onSubmit={onAddComment} alienId={alienId} userId={user.id || 'anon'} />
       <div className="mt-4">
         {comments
           .filter((comment) => !comment.parentId)

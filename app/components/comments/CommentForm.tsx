@@ -1,22 +1,40 @@
 import React, { useState } from 'react';
 
 interface CommentFormProps {
-  onSubmit: (content: string) => void;
+  onSubmit: (comment: import('../../types/comment').Comment) => void;
   placeholder?: string;
   initialValue?: string;
+  parentId?: string;
+  alienId?: string;
+  userId?: string;
 }
 
 const CommentForm: React.FC<CommentFormProps> = ({
   onSubmit,
   placeholder = 'Escribe un comentario...',
   initialValue = '',
+  parentId,
+  alienId,
+  userId,
 }) => {
   const [content, setContent] = useState(initialValue);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (content.trim()) {
-      onSubmit(content.trim());
+    if (content.trim() && alienId && userId) {
+      const newComment = {
+        id: (window.crypto?.randomUUID?.() || Math.random().toString(36).substr(2, 9)),
+        alienId,
+        userId,
+        content: content.trim(),
+        likes: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isEdited: false,
+        parentId,
+        replies: [],
+      };
+      onSubmit(newComment);
       setContent('');
     }
   };

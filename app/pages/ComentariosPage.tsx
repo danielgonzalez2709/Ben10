@@ -65,27 +65,7 @@ const initialComments: Comment[] = [
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const currentUserId = user?.id || '';
 
-// Función para anidar comentarios
-function nestComments(comments: Comment[]): Comment[] {
-  const map = new Map<string, Comment & { replies: Comment[] }>();
-  const roots: (Comment & { replies: Comment[] })[] = [];
-  // Inicializa el mapa
-  comments.forEach(comment => {
-    map.set(comment.id, { ...comment, replies: [] });
-  });
-  // Anida recursivamente
-  map.forEach(comment => {
-    if (comment.parentId) {
-      const parent = map.get(comment.parentId);
-      if (parent) {
-        parent.replies.push(comment);
-      }
-    } else {
-      roots.push(comment);
-    }
-  });
-  return roots;
-}
+// Eliminar la función nestComments y su uso
 
 const ComentariosPage: React.FC = () => {
   const location = useLocation();
@@ -101,6 +81,8 @@ const ComentariosPage: React.FC = () => {
   const [userMap, setUserMap] = useState<Record<string, string>>({});
   // En ComentariosPage, agrega un estado para controlar qué comentario está expandido:
   const [expandedComment, setExpandedComment] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/users')
@@ -122,16 +104,16 @@ const ComentariosPage: React.FC = () => {
   }, [location.search]);
 
   // 1. NO filtres el array plano antes de anidar. Usa todos los comentarios para anidar.
-  const allNested = nestComments(comments);
+  // const allNested = nestComments(comments);
   // 2. Filtra solo los comentarios raíz después de anidar:
-  let filtered: Comment[] = allNested;
+  let filtered: Comment[] = comments;
 
   if (tab === 'popular') {
-    filtered = [...allNested].sort((a, b) => b.likes - a.likes);
+    filtered = [...comments].sort((a, b) => b.likes - a.likes);
   } else if (tab === 'recent') {
-    filtered = [...allNested].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    filtered = [...comments].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } else if (tab === 'mine') {
-    filtered = allNested.filter(c => c.userId === currentUserId);
+    filtered = comments.filter(c => c.userId === currentUserId);
   }
 
   if (filterAlien !== 'all') {
@@ -186,6 +168,24 @@ const ComentariosPage: React.FC = () => {
     setReplyText('');
   };
 
+  const handleRequestDelete = (id: string) => {
+    setCommentToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (commentToDelete) {
+      deleteComment(commentToDelete);
+      setShowDeleteModal(false);
+      setCommentToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setCommentToDelete(null);
+  };
+
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
@@ -200,7 +200,7 @@ const ComentariosPage: React.FC = () => {
     return `Hace ${diffInWeeks} semana${diffInWeeks > 1 ? 's' : ''}`;
   };
 
-  const nestedComments = nestComments(filtered);
+  // Eliminar la función nestComments y su uso
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 p-4">
@@ -368,15 +368,38 @@ const ComentariosPage: React.FC = () => {
               handleAddReply={handleAddReply}
               expandedComment={expandedComment}
               setExpandedComment={setExpandedComment}
+              deleteComment={deleteComment}
+              handleRequestDelete={handleRequestDelete}
             />
           ))
         )}
       </div>
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold mb-4 text-gray-900">¿Estás seguro que quieres borrar este comentario?</h3>
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={handleCancelDelete}
+                className="px-4 py-2 border border-gray-400 rounded bg-white text-black font-bold hover:bg-gray-200"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, replyTo, setReplyTo, replyText, setReplyText, handleAddReply, expandedComment, setExpandedComment }: {
+function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, replyTo, setReplyTo, replyText, setReplyText, handleAddReply, expandedComment, setExpandedComment, deleteComment, handleRequestDelete }: {
   comment: Comment,
   userMap: Record<string, string>,
   formatTimeAgo: (date: Date) => string,
@@ -388,9 +411,13 @@ function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, r
   setReplyText: (text: string) => void,
   handleAddReply: (e: React.FormEvent, parentId: string) => void,
   expandedComment: string | null,
-  setExpandedComment: (id: string | null) => void
+  setExpandedComment: (id: string | null) => void,
+  deleteComment: (id: string) => void,
+  handleRequestDelete: (id: string) => void,
 }) {
   const isExpanded = expandedComment === comment.id;
+  const hasReplies = comment.replies && comment.replies.length > 0;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-4">
       <div className="flex items-start gap-3 mb-3">
@@ -419,11 +446,9 @@ function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, r
           </div>
         </div>
       </div>
-      
       <div className="mb-4 text-gray-800 leading-relaxed">
         {comment.content}
       </div>
-      
       <div className="flex items-center gap-4 text-sm">
         <button
           onClick={() => handleLike(comment.id)}
@@ -436,25 +461,31 @@ function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, r
           <span>{userLikes[comment.id] ? '💚' : '👍'}</span>
           {comment.likes}
         </button>
-        
-        {comment.replies && comment.replies.length > 1 ? (
+        {/* Botón de respuestas estilo YouTube */}
+        {hasReplies && (
           <button
             onClick={() => setExpandedComment(isExpanded ? null : comment.id)}
-            className="flex items-center gap-1 text-gray-600 hover:text-green-600 font-medium"
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium"
           >
-            {isExpanded ? 'Ver menos' : `Ver ${comment.replies.length} respuestas`}
+            {isExpanded ? 'Ver menos' : `${comment.replies.length} respuesta${comment.replies.length > 1 ? 's' : ''}`}
           </button>
-        ) : comment.replies && comment.replies.length === 1 ? null : (
+        )}
+        <button
+          onClick={() => setReplyTo(comment.id)}
+          className="flex items-center gap-1 text-gray-600 hover:text-green-600 font-medium"
+        >
+          <span>💬</span>
+          Responder
+        </button>
+        {user.id === comment.userId && (
           <button
-            onClick={() => setReplyTo(comment.id)}
-            className="flex items-center gap-1 text-gray-600 hover:text-green-600 font-medium"
+            onClick={() => handleRequestDelete(comment.id)}
+            className="flex items-center gap-1 text-red-600 hover:text-red-800 font-medium"
           >
-            <span>💬</span>
-            Responder
+            🗑️ Eliminar comentario
           </button>
         )}
       </div>
-
       {/* Formulario de respuesta */}
       {replyTo === comment.id && (
         <form onSubmit={e => handleAddReply(e, comment.id)} className="mt-4 p-4 bg-gray-50 rounded-lg">
@@ -483,10 +514,9 @@ function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, r
           </div>
         </form>
       )}
-
-      {/* Respuestas anidadas */}
-      {isExpanded && comment.replies && comment.replies.length > 0 && (
-        <div className="mt-4 space-y-3 ml-6">
+      {/* Respuestas anidadas visualmente, ocultas por defecto y expandibles */}
+      {hasReplies && isExpanded && (
+        <div className="mt-4 space-y-3 ml-8 border-l-2 border-blue-200 pl-4">
           {comment.replies.map(reply => (
             <CommentItem
               key={reply.id}
@@ -502,6 +532,8 @@ function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, r
               handleAddReply={handleAddReply}
               expandedComment={expandedComment}
               setExpandedComment={setExpandedComment}
+              deleteComment={deleteComment}
+              handleRequestDelete={handleRequestDelete}
             />
           ))}
         </div>

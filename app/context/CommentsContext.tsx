@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { comments as initialComments } from '../data/comments';
 import type { Comment } from '../types/comment';
 
@@ -20,16 +20,85 @@ export const useComments = () => {
 };
 
 export const CommentsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [comments, setComments] = useState<Comment[]>([]);
 
-  const addComment = (comment: Comment) => {
-    setComments(prev => [
-      {
-        ...comment,
-        replies: comment.replies ?? [],
-      },
-      ...prev
-    ]);
+  // Cargar comentarios desde el backend al iniciar
+  useEffect(() => {
+    fetch('http://localhost:3001/api/comments')
+      .then(res => res.json())
+      .then(data => {
+        // Mapear los comentarios del backend al formato esperado en el frontend
+        const mapped = data.map((c: any) => ({
+          ...c,
+          createdAt: c.date ? new Date(c.date) : new Date(),
+          updatedAt: c.date ? new Date(c.date) : new Date(),
+          content: c.text,
+        }));
+        // Anidar comentarios
+        const map = new Map<string, Comment & { replies: Comment[] }>();
+        mapped.forEach((comment: Comment) => {
+          map.set(comment.id, { ...comment, replies: [] });
+        });
+        const roots: (Comment & { replies: Comment[] })[] = [];
+        map.forEach((comment: Comment & { replies: Comment[] }) => {
+          if (comment.parentId) {
+            const parent = map.get(comment.parentId);
+            if (parent) parent.replies.push(comment);
+          } else {
+            roots.push(comment);
+          }
+        });
+        setComments(roots);
+      });
+  }, []);
+
+  const addComment = async (comment: Comment) => {
+    // El backend espera: alienId, userId, text, parentId (opcional)
+    const body: any = {
+      alienId: comment.alienId,
+      userId: comment.userId,
+      text: comment.content,
+    };
+    if (comment.parentId) body.parentId = comment.parentId;
+    const res = await fetch('http://localhost:3001/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      const saved = await res.json();
+      const mapped = {
+        ...saved,
+        createdAt: saved.date ? new Date(saved.date) : new Date(),
+        updatedAt: saved.date ? new Date(saved.date) : new Date(),
+        content: saved.text,
+      };
+      // Recargar todos los comentarios para mantener la estructura anidada
+      fetch('http://localhost:3001/api/comments')
+        .then(res => res.json())
+        .then(data => {
+          const mappedAll = data.map((c: any) => ({
+            ...c,
+            createdAt: c.date ? new Date(c.date) : new Date(),
+            updatedAt: c.date ? new Date(c.date) : new Date(),
+            content: c.text,
+          }));
+          const map = new Map<string, Comment & { replies: Comment[] }>();
+          mappedAll.forEach((comment: Comment) => {
+            map.set(comment.id, { ...comment, replies: [] });
+          });
+          const roots: (Comment & { replies: Comment[] })[] = [];
+          map.forEach((comment: Comment & { replies: Comment[] }) => {
+            if (comment.parentId) {
+              const parent = map.get(comment.parentId);
+              if (parent) parent.replies.push(comment);
+            } else {
+              roots.push(comment);
+            }
+          });
+          setComments(roots);
+        });
+    }
   };
 
   const editComment = (id: string, content: string) => {
@@ -38,8 +107,35 @@ export const CommentsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ));
   };
 
-  const deleteComment = (id: string) => {
-    setComments(prev => prev.filter(c => c.id !== id && c.parentId !== id));
+  const deleteComment = async (id: string) => {
+    const res = await fetch(`http://localhost:3001/api/comments/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      // Recargar todos los comentarios para mantener la estructura anidada
+      fetch('http://localhost:3001/api/comments')
+        .then(res => res.json())
+        .then(data => {
+          const mappedAll = data.map((c: any) => ({
+            ...c,
+            createdAt: c.date ? new Date(c.date) : new Date(),
+            updatedAt: c.date ? new Date(c.date) : new Date(),
+            content: c.text,
+          }));
+          const map = new Map<string, Comment & { replies: Comment[] }>();
+          mappedAll.forEach((comment: Comment) => {
+            map.set(comment.id, { ...comment, replies: [] });
+          });
+          const roots: (Comment & { replies: Comment[] })[] = [];
+          map.forEach((comment: Comment & { replies: Comment[] }) => {
+            if (comment.parentId) {
+              const parent = map.get(comment.parentId);
+              if (parent) parent.replies.push(comment);
+            } else {
+              roots.push(comment);
+            }
+          });
+          setComments(roots);
+        });
+    }
   };
 
   const likeComment = (id: string) => {

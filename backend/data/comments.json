@@ -1,1 +1,28 @@
-[] 
+[
+  {
+    "id": "4b34857e-2cbf-4a23-899f-4e688a986472",
+    "alienId": "13",
+    "userId": "7c64e22e-c2ac-4b26-91dd-555b38e1ea31",
+    "text": "Hola",
+    "date": "2025-07-19T16:47:01.727Z",
+    "likes": 0
+  },
+  {
+    "id": "f00431c5-8d8e-44ca-a680-c2a45a219ee7",
+    "alienId": "13",
+    "userId": "7c64e22e-c2ac-4b26-91dd-555b38e1ea31",
+    "text": "Chao",
+    "date": "2025-07-19T16:47:08.531Z",
+    "likes": 0,
+    "parentId": "4b34857e-2cbf-4a23-899f-4e688a986472"
+  },
+  {
+    "id": "4d9995c8-9421-417b-94a1-55dd963f24ff",
+    "alienId": "13",
+    "userId": "7c64e22e-c2ac-4b26-91dd-555b38e1ea31",
+    "text": "Eh hola",
+    "date": "2025-07-19T16:47:17.704Z",
+    "likes": 0,
+    "parentId": "4b34857e-2cbf-4a23-899f-4e688a986472"
+  }
+]
