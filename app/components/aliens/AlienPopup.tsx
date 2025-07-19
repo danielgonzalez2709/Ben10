@@ -18,29 +18,41 @@ interface AlienPopupProps {
   onDeleteComment: (commentId: string) => void;
 }
 
-const AlienPopup: React.FC<AlienPopupProps> = ({
-  isOpen,
-  onClose,
-  alien,
-  comments,
-  onFavoriteToggle,
-  onAddComment,
-  onLikeComment,
-  onEditComment,
-  onDeleteComment,
-}) => {
+const AlienPopup: React.FC<AlienPopupProps> = (props) => {
+  // Hooks siempre al inicio
   const { activateAlien } = useAliens();
   const navigate = useNavigate();
   const [activateMsg, setActivateMsg] = React.useState<string | null>(null);
+  const userMap = React.useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('userMap') || '{}');
+    } catch {
+      return {};
+    }
+  }, []);
+
+  const { isOpen, onClose, alien, comments, onFavoriteToggle, onAddComment, onLikeComment, onEditComment, onDeleteComment } = props;
 
   if (!alien) return null;
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const isSuperUser = user && user.isSuperUser;
 
-  const topComment = comments
-    .filter((c) => !c.parentId)
-    .sort((a, b) => b.likes - a.likes)[0];
+  // Elegir el comentario destacado: más likeado, si no hay likes, el más reciente
+  const rootComments = comments.filter((c) => !c.parentId);
+  let topComment = null;
+  if (rootComments.length > 0) {
+    const maxLikes = Math.max(...rootComments.map(c => c.likes));
+    if (maxLikes > 0) {
+      topComment = rootComments.find(c => c.likes === maxLikes);
+    } else {
+      // Si no hay likes, el más reciente
+      topComment = rootComments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    }
+  } else if (comments.length > 0) {
+    // Si no hay comentarios raíz, mostrar el comentario más reciente de cualquier tipo
+    topComment = comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+  }
   const respuestas = topComment?.replies?.length || 0;
 
   const handleVerComentarios = () => {
@@ -136,17 +148,17 @@ const AlienPopup: React.FC<AlienPopupProps> = ({
             {/* Comentario destacado */}
             <div className="bg-gray-50 rounded-lg p-4 shadow-inner mb-2">
               <h3 className="text-lg font-semibold mb-2 text-gray-800">Comentarios</h3>
-              {comments && comments.length > 0 ? (
+              {topComment ? (
                 <div className="bg-white rounded-lg shadow p-3 mb-2">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-black">{comments[0].userId}</span>
+                    <span className="font-bold text-black">{userMap[topComment.userId] || topComment.userId}</span>
                     <span className="text-gray-500 text-xs">
-                      {new Date(comments[0].createdAt).toLocaleDateString()}
+                      {new Date(topComment.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="mb-1 text-gray-700 font-medium">{comments[0].content}</div>
+                  <div className="mb-1 text-gray-700 font-medium">{topComment.content}</div>
                   <div className="flex gap-4 text-gray-600 text-sm">
-                    <span className="flex items-center gap-1">👍 {comments[0].likes}</span>
+                    <span className="flex items-center gap-1">👍 {topComment.likes}</span>
                   </div>
                 </div>
               ) : (

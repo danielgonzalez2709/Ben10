@@ -7,7 +7,6 @@ const TABS = [
   { label: 'Todos los comentarios', value: 'all', icon: '💬' },
   { label: 'Más populares', value: 'popular', icon: '🔥' },
   { label: 'Recientes', value: 'recent', icon: '🕒' },
-  { label: 'Mis comentarios', value: 'mine', icon: '👤' },
 ];
 
 // Elimina el objeto users simulado y avatars
@@ -112,8 +111,6 @@ const ComentariosPage: React.FC = () => {
     filtered = [...comments].sort((a, b) => b.likes - a.likes);
   } else if (tab === 'recent') {
     filtered = [...comments].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  } else if (tab === 'mine') {
-    filtered = comments.filter(c => c.userId === currentUserId);
   }
 
   if (filterAlien !== 'all') {
@@ -490,7 +487,7 @@ function CommentItem({ comment, userMap, formatTimeAgo, handleLike, userLikes, r
           <span>💬</span>
           Responder
         </button>
-        {user.id === comment.userId && (
+        { (user.id === comment.userId || user.username === 'ben10') && (
           <button
             onClick={() => handleRequestDelete(comment.id)}
             className="flex items-center gap-1 text-red-600 hover:text-red-800 font-medium"

@@ -101,7 +101,7 @@
     },
     "isFavorite": false,
     "priority": 5,
-    "isActive": false,
+    "isActive": true,
     "category": "original"
   },
   {
@@ -269,7 +269,7 @@
     },
     "isFavorite": false,
     "priority": 13,
-    "isActive": true,
+    "isActive": false,
     "category": "alienforce"
   },
   {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { aliens as initialAliens } from '../data/aliens';
 import { comments as initialComments } from '../data/comments';
@@ -11,8 +11,18 @@ const AliensPage: React.FC = () => {
   const { aliens, toggleFavorite } = useAliens();
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [comments] = useState(initialComments);
+  const [comments, setComments] = useState<Comment[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isModalOpen && selectedAlien) {
+      fetch(`/api/comments?alienId=${selectedAlien.id}`)
+        .then(res => res.json())
+        .then(data => setComments(data));
+    } else {
+      setComments([]);
+    }
+  }, [isModalOpen, selectedAlien]);
 
   const handleAlienClick = (alien: Alien) => {
     setSelectedAlien(alien);
