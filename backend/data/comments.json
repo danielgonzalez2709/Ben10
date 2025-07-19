@@ -5,7 +5,10 @@
     "userId": "7c64e22e-c2ac-4b26-91dd-555b38e1ea31",
     "text": "Hola",
     "date": "2025-07-19T16:47:01.727Z",
-    "likes": 0
+    "likes": 1,
+    "likedBy": [
+      "7c64e22e-c2ac-4b26-91dd-555b38e1ea31"
+    ]
   },
   {
     "id": "f00431c5-8d8e-44ca-a680-c2a45a219ee7",
@@ -13,8 +16,11 @@
     "userId": "7c64e22e-c2ac-4b26-91dd-555b38e1ea31",
     "text": "Chao",
     "date": "2025-07-19T16:47:08.531Z",
-    "likes": 0,
-    "parentId": "4b34857e-2cbf-4a23-899f-4e688a986472"
+    "likes": 1,
+    "parentId": "4b34857e-2cbf-4a23-899f-4e688a986472",
+    "likedBy": [
+      "7c64e22e-c2ac-4b26-91dd-555b38e1ea31"
+    ]
   },
   {
     "id": "4d9995c8-9421-417b-94a1-55dd963f24ff",
@@ -23,6 +29,27 @@
     "text": "Eh hola",
     "date": "2025-07-19T16:47:17.704Z",
     "likes": 0,
-    "parentId": "4b34857e-2cbf-4a23-899f-4e688a986472"
+    "parentId": "4b34857e-2cbf-4a23-899f-4e688a986472",
+    "likedBy": []
+  },
+  {
+    "id": "d3e7f4c8-a4cb-456b-af42-c77fcc776b33",
+    "alienId": "13",
+    "userId": "7c64e22e-c2ac-4b26-91dd-555b38e1ea31",
+    "text": "Hola soy tu fan",
+    "date": "2025-07-19T16:54:44.237Z",
+    "likes": 0,
+    "parentId": "4b34857e-2cbf-4a23-899f-4e688a986472",
+    "likedBy": []
+  },
+  {
+    "id": "a0c87c94-02c2-4bb5-9473-04b8f44a09d8",
+    "alienId": "13",
+    "userId": "e5313c38-ad2f-4d04-ad43-7c0f22c1c3e8",
+    "text": "Hola soy tu fan x2",
+    "date": "2025-07-19T16:58:00.560Z",
+    "likes": 0,
+    "parentId": "4b34857e-2cbf-4a23-899f-4e688a986472",
+    "likedBy": []
   }
 ]

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllComments, getCommentsByAlien, addComment, updateComment, deleteComment, Comment } from '../models/commentsData';
+import { getAllComments, getCommentsByAlien, addComment, updateComment, deleteComment, Comment, likeComment as likeCommentModel, unlikeComment as unlikeCommentModel } from '../models/commentsData';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticateJWT, AuthRequest } from '../middleware/auth';
 
@@ -60,6 +60,24 @@ router.put('/:id/favorite', authenticateJWT, (req: AuthRequest, res) => {
   if (!req.user?.isSuperUser) return res.status(403).json({ error: 'Solo Ben10 puede marcar comentarios favoritos' });
   const updated = updateComment(req.params.id, { favorite: true });
   if (!updated) return res.status(404).json({ error: 'Comentario no encontrado' });
+  res.json(updated);
+});
+
+// PUT /api/comments/:id/like
+router.put('/:id/like', (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(400).json({ error: 'Falta userId' });
+  const updated = likeCommentModel(req.params.id, userId);
+  if (!updated) return res.status(404).json({ error: 'Comentario no encontrado o ya tiene like de este usuario' });
+  res.json(updated);
+});
+
+// PUT /api/comments/:id/unlike
+router.put('/:id/unlike', (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(400).json({ error: 'Falta userId' });
+  const updated = unlikeCommentModel(req.params.id, userId);
+  if (!updated) return res.status(404).json({ error: 'Comentario no encontrado o el usuario no ha dado like' });
   res.json(updated);
 });
 

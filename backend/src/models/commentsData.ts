@@ -9,6 +9,8 @@ export type Comment = {
   date: string;
   likes: number;
   favorite?: boolean;
+  parentId?: string;
+  likedBy?: string[];
 };
 
 const DATA_PATH = path.join(__dirname, '../../data/comments.json');
@@ -33,7 +35,7 @@ export function getCommentsByAlien(alienId: string) {
 
 export function addComment(comment: Comment) {
   const comments = loadComments();
-  comments.push(comment);
+  comments.push({ ...comment, likedBy: comment.likedBy || [] });
   saveComments(comments);
   return comment;
 }
@@ -51,6 +53,34 @@ export function deleteComment(id: string) {
   let comments = loadComments();
   const comment = comments.find(c => c.id === id);
   comments = comments.filter(c => c.id !== id);
+  saveComments(comments);
+  return comment;
+}
+
+export function likeComment(id: string, userId: string) {
+  const comments = loadComments();
+  const idx = comments.findIndex(c => c.id === id);
+  if (idx === -1) return null;
+  const comment = comments[idx];
+  if (!comment.likedBy) comment.likedBy = [];
+  if (comment.likedBy.includes(userId)) return comment; // Ya dio like
+  comment.likes += 1;
+  comment.likedBy.push(userId);
+  comments[idx] = comment;
+  saveComments(comments);
+  return comment;
+}
+
+export function unlikeComment(id: string, userId: string) {
+  const comments = loadComments();
+  const idx = comments.findIndex(c => c.id === id);
+  if (idx === -1) return null;
+  const comment = comments[idx];
+  if (!comment.likedBy) comment.likedBy = [];
+  if (!comment.likedBy.includes(userId)) return comment; // No ha dado like
+  comment.likes = Math.max(0, comment.likes - 1);
+  comment.likedBy = comment.likedBy.filter(uid => uid !== userId);
+  comments[idx] = comment;
   saveComments(comments);
   return comment;
 } 

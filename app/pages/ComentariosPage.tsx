@@ -140,8 +140,21 @@ const ComentariosPage: React.FC = () => {
     setShowForm(false);
   };
 
+  // Al inicio del componente ComentariosPage:
+  useEffect(() => {
+    // Cargar likes del usuario desde localStorage
+    const storedLikes = localStorage.getItem('userLikes');
+    if (storedLikes) {
+      setUserLikes(JSON.parse(storedLikes));
+    }
+  }, []);
+
   const handleLike = (id: string) => {
-    likeComment(id);
+    const alreadyLiked = !!userLikes[id];
+    likeComment(id, alreadyLiked);
+    const newUserLikes = { ...userLikes, [id]: !alreadyLiked };
+    setUserLikes(newUserLikes);
+    localStorage.setItem('userLikes', JSON.stringify(newUserLikes));
   };
 
   const handleShowReply = (id: string) => {
@@ -155,7 +168,7 @@ const ComentariosPage: React.FC = () => {
     addComment({
       id: `r${Date.now()}`,
       alienId: comments.find(c => c.id === parentId)?.alienId || '',
-      userId: currentUserId,
+      userId: user.id, // usar siempre el usuario autenticado actual
       content: replyText,
       likes: 0,
       createdAt: new Date(),

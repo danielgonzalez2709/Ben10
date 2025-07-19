@@ -138,10 +138,42 @@ export const CommentsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const likeComment = (id: string) => {
-    setComments(prev => prev.map(c =>
-      c.id === id ? { ...c, likes: c.likes + 1 } : c
-    ));
+  const likeComment = async (id: string, alreadyLiked: boolean) => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user?.id) return;
+    const endpoint = alreadyLiked ? 'unlike' : 'like';
+    const res = await fetch(`http://localhost:3001/api/comments/${id}/${endpoint}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.id }),
+    });
+    if (res.ok) {
+      // Recargar todos los comentarios para mantener la estructura anidada
+      fetch('http://localhost:3001/api/comments')
+        .then(res => res.json())
+        .then(data => {
+          const mappedAll = data.map((c: any) => ({
+            ...c,
+            createdAt: c.date ? new Date(c.date) : new Date(),
+            updatedAt: c.date ? new Date(c.date) : new Date(),
+            content: c.text,
+          }));
+          const map = new Map<string, Comment & { replies: Comment[] }>();
+          mappedAll.forEach((comment: Comment) => {
+            map.set(comment.id, { ...comment, replies: [] });
+          });
+          const roots: (Comment & { replies: Comment[] })[] = [];
+          map.forEach((comment: Comment & { replies: Comment[] }) => {
+            if (comment.parentId) {
+              const parent = map.get(comment.parentId);
+              if (parent) parent.replies.push(comment);
+            } else {
+              roots.push(comment);
+            }
+          });
+          setComments(roots);
+        });
+    }
   };
 
   return (
