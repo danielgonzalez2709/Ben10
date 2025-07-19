@@ -204,7 +204,7 @@
         "Possession"
       ]
     },
-    "isFavorite": false,
+    "isFavorite": true,
     "priority": 10,
     "isActive": false,
     "category": "original"
@@ -267,7 +267,7 @@
         "Agility"
       ]
     },
-    "isFavorite": false,
+    "isFavorite": true,
     "priority": 13,
     "isActive": false,
     "category": "alienforce"
