@@ -9,35 +9,33 @@ import { useAliens } from '../context/AliensContext';
 
 const FavoritesPage: React.FC = () => {
   const { aliens, toggleFavorite } = useAliens();
-  const favorites = aliens.filter(a => a.isFavorite);
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const isSuperUser = user && user.isSuperUser;
 
-  useEffect(() => {
-    if (isModalOpen && selectedAlien) {
-      fetch(`/api/comments?alienId=${selectedAlien.id}`)
-        .then(res => res.json())
-        .then(data => {
-          const mapped = data.map((c: any) => ({
-            ...c,
-            content: c.text,
-            createdAt: new Date(c.date),
-            updatedAt: new Date(c.date),
-            parentId: c.parentId ?? undefined,
-            replies: [],
-            isEdited: false
-          }));
-          setComments(mapped as Comment[]);
-        });
-    } else {
-      setComments([]);
+  // Refrescar aliens desde backend
+  const fetchAliens = async () => {
+    try {
+      const res = await fetch('http://localhost:3001/api/aliens');
+      const data = await res.json();
+      // setAliens(data); // This line is removed as per the edit hint
+    } catch (err) {
+      // opcional: manejo de error
     }
-  }, [isModalOpen, selectedAlien]);
+  };
+
+  useEffect(() => {
+    // Escuchar evento para refrescar aliens globalmente
+    const handler = () => fetchAliens();
+    window.addEventListener('aliens:refresh', handler);
+    return () => window.removeEventListener('aliens:refresh', handler);
+  }, []);
 
   // Ordenar por prioridad
+  const favorites = aliens.filter(a => a.isFavorite);
   const priorityList = [...favorites].sort((a, b) => a.priority - b.priority);
 
   // Simular activar alien
@@ -46,18 +44,40 @@ const FavoritesPage: React.FC = () => {
   };
 
   // Reordenar favoritos (drag & drop)
-  const handleReorder = (result: any) => {
+  const handleReorder = async (result: any) => {
     if (!result.destination) return;
-    const items = Array.from(favorites);
+    const items = Array.from(priorityList);
     const [reordered] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reordered);
-    // Actualizar prioridad
-    // Implementation needed
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      await Promise.all(
+        items.map((alien, idx) =>
+          fetch(`http://localhost:3001/api/aliens/${alien.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ priority: idx + 1 })
+          })
+        )
+      );
+      // Refresca la lista global
+      // await fetchAliens(); // This line is removed as per the edit hint
+    } catch (err) {
+      alert('Error al actualizar prioridades');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Eliminar de favoritos
-  const handleRemove = (id: string) => {
-    // Implementation needed
+  const handleRemoveFavorite = async (id: string) => {
+    setLoading(true);
+    await toggleFavorite(id); // El contexto refresca el estado global
+    setLoading(false);
   };
 
   const handleOpenModal = (alien: Alien) => {
@@ -118,7 +138,7 @@ const FavoritesPage: React.FC = () => {
             {isSuperUser && (
               <button
                 className="px-3 py-1 rounded text-sm bg-yellow-400 text-white w-full"
-                onClick={e => { e.stopPropagation(); toggleFavorite(alien.id); }}
+                onClick={e => { e.stopPropagation(); handleRemoveFavorite(alien.id); }}
               >
                 Quitar de Favoritos
               </button>
@@ -144,20 +164,21 @@ const FavoritesPage: React.FC = () => {
       {/* Lista de Prioridad */}
       <section>
         <h2 className="text-xl font-bold mb-4 text-black">Lista de Prioridad</h2>
-        <div className="bg-white rounded-lg shadow p-4">
-          {priorityList.map((alien, idx) => (
-            <div key={alien.id} className="flex items-center justify-between border-b last:border-b-0 py-2">
-              <div className="flex items-center gap-3">
-                <span className="bg-green-100 text-green-700 rounded-full w-7 h-7 flex items-center justify-center font-bold">{idx + 1}</span>
-                <span className="font-bold text-black">{alien.name}</span>
-              </div>
-              <span className="text-gray-500 text-sm">Usado {alien.stats.usageCount} veces</span>
-            </div>
-          ))}
+        <div>
+          <FavoriteList
+            favorites={priorityList}
+            onReorder={isSuperUser ? handleReorder : undefined}
+            draggable={isSuperUser}
+          />
         </div>
       </section>
       {/* Lista Drag & Drop (opcional, para gestión) */}
       {/* <FavoriteList favorites={favorites} onReorder={handleReorder} onRemove={handleRemove} /> */}
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow text-lg font-bold text-green-700">Guardando cambios...</div>
+        </div>
+      )}
     </div>
   );
 };

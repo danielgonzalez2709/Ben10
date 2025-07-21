@@ -57,7 +57,7 @@
         "Durability"
       ]
     },
-    "isFavorite": false,
+    "isFavorite": true,
     "priority": 3,
     "isActive": false,
     "category": "original"
@@ -99,7 +99,7 @@
         "Agility"
       ]
     },
-    "isFavorite": false,
+    "isFavorite": true,
     "priority": 5,
     "isActive": false,
     "category": "original"
@@ -225,7 +225,7 @@
         "Impact Resistance"
       ]
     },
-    "isFavorite": false,
+    "isFavorite": true,
     "priority": 11,
     "isActive": false,
     "category": "alienforce"
@@ -288,7 +288,7 @@
         "Flexibility"
       ]
     },
-    "isFavorite": false,
+    "isFavorite": true,
     "priority": 14,
     "isActive": false,
     "category": "alienforce"
