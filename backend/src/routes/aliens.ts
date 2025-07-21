@@ -87,8 +87,20 @@ router.put('/:id/favorite', authenticateJWT, (req: AuthRequest, res) => {
   if (!req.user?.isSuperUser)
     return res.status(403).json({ error: 'Solo Ben10 puede marcar favoritos' });
 
-  const updated = updateAlien(req.params.id, { isFavorite: true });
-  if (!updated) return res.status(404).json({ error: 'Alien no encontrado' });
+  // Obtener el alien actual
+  const alien = getAlienById(req.params.id);
+  if (!alien) {
+    return res.status(404).json({ error: 'Alien no encontrado' });
+  }
+
+  // Toggle del estado de favorito
+  const newFavoriteStatus = !alien.isFavorite;
+  
+  const updated = updateAlien(req.params.id, { isFavorite: newFavoriteStatus });
+  if (!updated) {
+    return res.status(404).json({ error: 'Alien no encontrado' });
+  }
+  
   res.json(updated);
 });
 

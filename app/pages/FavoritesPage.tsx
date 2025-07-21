@@ -29,7 +29,10 @@ const FavoritesPage: React.FC = () => {
 
   useEffect(() => {
     // Escuchar evento para refrescar aliens globalmente
-    const handler = () => fetchAliens();
+    const handler = () => {
+      // No necesitamos fetchAliens aquí porque el contexto ya maneja el estado
+      console.log('Aliens refreshed from context');
+    };
     window.addEventListener('aliens:refresh', handler);
     return () => window.removeEventListener('aliens:refresh', handler);
   }, []);
@@ -77,6 +80,13 @@ const FavoritesPage: React.FC = () => {
   const handleRemoveFavorite = async (id: string) => {
     setLoading(true);
     await toggleFavorite(id); // El contexto refresca el estado global
+    setLoading(false);
+  };
+
+  // Función para manejar la eliminación desde la lista de prioridad
+  const handleRemove = async (id: string) => {
+    setLoading(true);
+    await toggleFavorite(id);
     setLoading(false);
   };
 
@@ -168,6 +178,7 @@ const FavoritesPage: React.FC = () => {
           <FavoriteList
             favorites={priorityList}
             onReorder={isSuperUser ? handleReorder : undefined}
+            onRemove={isSuperUser ? handleRemove : undefined}
             draggable={isSuperUser}
           />
         </div>
@@ -184,3 +195,6 @@ const FavoritesPage: React.FC = () => {
 };
 
 export default FavoritesPage; 
+
+
+

@@ -15,7 +15,7 @@
         "Hand-to-hand Combat"
       ]
     },
-    "isFavorite": true,
+    "isFavorite": false,
     "priority": 1,
     "isActive": true,
     "category": "original"

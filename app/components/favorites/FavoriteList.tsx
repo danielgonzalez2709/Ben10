@@ -9,7 +9,12 @@ interface FavoriteListProps {
   draggable?: boolean;
 }
 
-const FavoriteList: React.FC<FavoriteListProps> = ({ favorites, onReorder = () => {}, onRemove, draggable = true }) => {
+const FavoriteList: React.FC<FavoriteListProps> = ({ 
+  favorites, 
+  onReorder = () => {}, 
+  onRemove, 
+  draggable = true 
+}) => {
   // Verificar si el usuario es superusuario
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const isSuperUser = user && user.isSuperUser;
@@ -18,7 +23,7 @@ const FavoriteList: React.FC<FavoriteListProps> = ({ favorites, onReorder = () =
   const canDrag = draggable && isSuperUser;
 
   if (!canDrag) {
-    // Vista de solo lectura
+    // Vista de solo lectura para usuarios normales
     return (
       <div className="bg-white rounded-lg shadow-md p-4">
         <div className="space-y-3">
@@ -71,7 +76,7 @@ const FavoriteList: React.FC<FavoriteListProps> = ({ favorites, onReorder = () =
                 {...provided.droppableProps}
                 ref={provided.innerRef}
                 className={`space-y-3 transition-colors duration-200 ${
-                  snapshot.isDraggingOver ? 'bg-green-50' : ''
+                  snapshot.isDraggingOver ? 'bg-green-50 rounded-lg p-2' : ''
                 }`}
               >
                 {favorites.map((alien, index) => (
@@ -86,7 +91,7 @@ const FavoriteList: React.FC<FavoriteListProps> = ({ favorites, onReorder = () =
                         {...provided.draggableProps}
                         className={`flex items-center justify-between bg-white p-4 rounded-lg border-2 transition-all duration-200 ${
                           snapshot.isDragging 
-                            ? 'border-green-400 shadow-lg scale-105 bg-green-50 z-50' 
+                            ? 'border-green-400 shadow-xl scale-105 bg-green-50 z-50 rotate-2' 
                             : 'border-gray-200 hover:border-green-300 hover:shadow-md'
                         }`}
                       >
@@ -126,7 +131,7 @@ const FavoriteList: React.FC<FavoriteListProps> = ({ favorites, onReorder = () =
                           </div>
                         </div>
                         
-                        {/* Botón de eliminar */}
+                        {/* Botón de eliminar y prioridad */}
                         <div className="flex items-center space-x-3">
                           <div className="text-sm text-gray-400">
                             Prioridad {index + 1}

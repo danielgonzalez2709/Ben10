@@ -39,31 +39,36 @@ export const AliensProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, []);
 
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = async (id: string) => {
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('Token no encontrado para marcar favorito');
       return;
     }
 
-    fetch(`http://localhost:3001/api/aliens/${id}/favorite`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    .then(async res => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/aliens/${id}/favorite`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
       if (!res.ok) {
         const error = await res.json();
         console.warn('No se pudo cambiar favorito:', error.message || error.error);
         return;
       }
+
+      // Refrescar la lista de aliens después de cambiar favorito
       await fetchAliens();
-    })
-    .catch(err => {
+      
+      // Emitir evento para que otras páginas se actualicen
+      window.dispatchEvent(new CustomEvent('aliens:refresh'));
+    } catch (err) {
       console.error('Error al cambiar favorito:', err);
-    });
+    }
   };
 
   const activateAlien = async (id: string) => {
