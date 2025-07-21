@@ -138,12 +138,6 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
           {/* Acciones del header */}
           <div className="flex items-center gap-3">
-            {/* Notificaciones */}
-            <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-              <span className="text-xl">🔔</span>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-            </button>
-
             {/* Perfil */}
             <div className="relative">
               <div
