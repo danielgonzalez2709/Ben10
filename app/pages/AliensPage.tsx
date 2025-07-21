@@ -5,6 +5,7 @@ import { comments as initialComments } from '../data/comments';
 import AlienList from '../components/aliens/AlienList';
 import AlienPopup from '../components/aliens/AlienPopup';
 import type { Alien } from '../types/alien';
+import type { Comment } from '../types/comment';
 import { useAliens } from '../context/AliensContext';
 
 const AliensPage: React.FC = () => {
@@ -18,7 +19,19 @@ const AliensPage: React.FC = () => {
     if (isModalOpen && selectedAlien) {
       fetch(`/api/comments?alienId=${selectedAlien.id}`)
         .then(res => res.json())
-        .then(data => setComments(data));
+        .then(data => {
+          // Mapear los campos del backend a los del frontend
+          const mapped = data.map((c: any) => ({
+            ...c,
+            content: c.text,
+            createdAt: new Date(c.date),
+            updatedAt: new Date(c.date),
+            parentId: c.parentId ?? undefined,
+            replies: [], // Si tienes replies anidados, deberías mapearlos también
+            isEdited: false // O ajusta según tu lógica
+          }));
+          setComments(mapped as Comment[]);
+        });
     } else {
       setComments([]);
     }

@@ -5,9 +5,10 @@
     "userId": "7c64e22e-c2ac-4b26-91dd-555b38e1ea31",
     "text": "Hola",
     "date": "2025-07-19T16:47:01.727Z",
-    "likes": 1,
+    "likes": 2,
     "likedBy": [
-      "7c64e22e-c2ac-4b26-91dd-555b38e1ea31"
+      "7c64e22e-c2ac-4b26-91dd-555b38e1ea31",
+      "e5313c38-ad2f-4d04-ad43-7c0f22c1c3e8"
     ]
   },
   {
@@ -43,5 +44,34 @@
     "likedBy": [
       "7c64e22e-c2ac-4b26-91dd-555b38e1ea31"
     ]
+  },
+  {
+    "id": "69a1b08a-46f6-4194-b51a-8acac5bd25d2",
+    "alienId": "13",
+    "userId": "e5313c38-ad2f-4d04-ad43-7c0f22c1c3e8",
+    "text": "Hola me gusta blitzwolfer",
+    "date": "2025-07-21T15:16:56.113Z",
+    "likes": 1,
+    "likedBy": [
+      "e5313c38-ad2f-4d04-ad43-7c0f22c1c3e8"
+    ]
+  },
+  {
+    "id": "af122152-fe71-4625-a308-5fed10768793",
+    "alienId": "11",
+    "userId": "e5313c38-ad2f-4d04-ad43-7c0f22c1c3e8",
+    "text": "Gordooo",
+    "date": "2025-07-21T15:22:23.646Z",
+    "likes": 0,
+    "likedBy": []
+  },
+  {
+    "id": "29cdaec1-4ce9-4c03-a18b-fef735cd5dfd",
+    "alienId": "5",
+    "userId": "e5313c38-ad2f-4d04-ad43-7c0f22c1c3e8",
+    "text": "Tan bonitoooo",
+    "date": "2025-07-21T15:31:54.097Z",
+    "likes": 0,
+    "likedBy": []
   }
 ]

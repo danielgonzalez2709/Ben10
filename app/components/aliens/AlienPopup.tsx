@@ -23,12 +23,15 @@ const AlienPopup: React.FC<AlienPopupProps> = (props) => {
   const { activateAlien } = useAliens();
   const navigate = useNavigate();
   const [activateMsg, setActivateMsg] = React.useState<string | null>(null);
-  const userMap = React.useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('userMap') || '{}');
-    } catch {
-      return {};
-    }
+  const [userMap, setUserMap] = React.useState<Record<string, string>>({});
+  React.useEffect(() => {
+    fetch('/api/users')
+      .then(res => res.json())
+      .then((users: any[]) => {
+        const map: Record<string, string> = {};
+        users.forEach(u => { map[u.id] = u.username; });
+        setUserMap(map);
+      });
   }, []);
 
   const { isOpen, onClose, alien, comments, onFavoriteToggle, onAddComment, onLikeComment, onEditComment, onDeleteComment } = props;

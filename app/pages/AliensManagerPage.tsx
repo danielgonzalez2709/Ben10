@@ -3,6 +3,7 @@ import { aliens as initialAliens } from '../data/aliens';
 import { comments as initialComments } from '../data/comments';
 import AlienPopup from '../components/aliens/AlienPopup';
 import type { Alien } from '../types/alien';
+import type { Comment } from '../types/comment';
 import { useAliens } from '../context/AliensContext';
 
 const categories = [
@@ -31,7 +32,7 @@ const AliensManagerPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [comments] = useState(initialComments);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [orderBy, setOrderBy] = useState('nombre-az');
   const [showOrderMenu, setShowOrderMenu] = useState(false);
 
@@ -109,6 +110,27 @@ const AliensManagerPage: React.FC = () => {
   React.useEffect(() => {
     setTempHabilidades(selectedHabilidades);
   }, [selectedHabilidades, selectedCategory]);
+
+  React.useEffect(() => {
+    if (isModalOpen && selectedAlien) {
+      fetch(`/api/comments?alienId=${selectedAlien.id}`)
+        .then(res => res.json())
+        .then(data => {
+          const mapped = data.map((c: any) => ({
+            ...c,
+            content: c.text,
+            createdAt: new Date(c.date),
+            updatedAt: new Date(c.date),
+            parentId: c.parentId ?? undefined,
+            replies: [],
+            isEdited: false
+          }));
+          setComments(mapped as Comment[]);
+        });
+    } else {
+      setComments([]);
+    }
+  }, [isModalOpen, selectedAlien]);
 
   return (
     <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full">
