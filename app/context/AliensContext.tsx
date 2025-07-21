@@ -33,7 +33,13 @@ export const AliensProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     fetchAliens(); // carga inicial
-    pollingRef.current = setInterval(fetchAliens, 3000);
+    pollingRef.current = setInterval(() => {
+      console.log('[AliensContext] Polling: isAliensDragging =', (window as any).isAliensDragging);
+      // Solo hacer polling si no se está arrastrando
+      if (!(window as any).isAliensDragging) {
+        fetchAliens();
+      }
+    }, 3000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };

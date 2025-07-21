@@ -39,7 +39,25 @@ const FavoritesPage: React.FC = () => {
 
   // Ordenar por prioridad
   const favorites = aliens.filter(a => a.isFavorite);
-  const priorityList = [...favorites].sort((a, b) => a.priority - b.priority);
+  const [priorityList, setPriorityList] = useState<Alien[]>(() =>
+    [...favorites].sort((a, b) => a.priority - b.priority)
+  );
+
+  // Bandera para saber si se está arrastrando
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Solo actualiza si cambia la cantidad de favoritos Y no se está arrastrando
+  useEffect(() => {
+    if (!isDragging) {
+      setPriorityList(prev =>
+        favorites.length !== prev.length
+          ? [...favorites].sort((a, b) => a.priority - b.priority)
+          : prev
+      );
+    }
+    // Actualiza la bandera global para el polling
+    (window as any).isAliensDragging = isDragging;
+  }, [favorites, isDragging]);
 
   // Simular activar alien
   const handleActivate = (id: string) => {
@@ -48,27 +66,36 @@ const FavoritesPage: React.FC = () => {
 
   // Reordenar favoritos (drag & drop)
   const handleReorder = async (result: any) => {
+    setIsDragging(false); // Al terminar el drag
+    (window as any).isAliensDragging = false;
     if (!result.destination) return;
     const items = Array.from(priorityList);
     const [reordered] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reordered);
+    setPriorityList(items); // Solo actualiza el estado local para el drag
+
+    // Log para depuración: mostrar el nuevo orden
+    console.log('Nuevo orden de prioridad:', items.map(a => ({ id: a.id, name: a.name, priority: a.priority })));
+
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       await Promise.all(
-        items.map((alien, idx) =>
-          fetch(`http://localhost:3001/api/aliens/${alien.id}`, {
+        items.map(async (alien, idx) => {
+          console.log(`Enviando PUT a /api/aliens/${alien.id} con priority: ${idx + 1}`);
+          const res = await fetch(`http://localhost:3001/api/aliens/${alien.id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ priority: idx + 1 })
-          })
-        )
+          });
+          const data = await res.json().catch(() => ({}));
+          console.log(`Respuesta backend para alien ${alien.id}:`, res.status, data);
+        })
       );
-      // Refresca la lista global
-      // await fetchAliens(); // This line is removed as per the edit hint
+      // Espera a que el backend termine y luego refresca el estado global (el contexto lo hará solo)
     } catch (err) {
       alert('Error al actualizar prioridades');
     } finally {
@@ -180,6 +207,7 @@ const FavoritesPage: React.FC = () => {
             onReorder={isSuperUser ? handleReorder : undefined}
             onRemove={isSuperUser ? handleRemove : undefined}
             draggable={isSuperUser}
+            setIsDragging={setIsDragging}
           />
         </div>
       </section>

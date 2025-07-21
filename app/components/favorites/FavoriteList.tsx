@@ -7,13 +7,15 @@ interface FavoriteListProps {
   onReorder?: (result: any) => void;
   onRemove?: (alienId: string) => void;
   draggable?: boolean;
+  setIsDragging?: (dragging: boolean) => void;
 }
 
 const FavoriteList: React.FC<FavoriteListProps> = ({ 
   favorites, 
   onReorder = () => {}, 
   onRemove, 
-  draggable = true 
+  draggable = true,
+  setIsDragging
 }) => {
   // Verificar si el usuario es superusuario
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -69,7 +71,14 @@ const FavoriteList: React.FC<FavoriteListProps> = ({
           No hay aliens en la lista de prioridad
         </div>
       ) : (
-        <DragDropContext onDragEnd={onReorder}>
+        <DragDropContext
+          onDragEnd={result => { console.log('DragEnd fired', result); onReorder(result); }}
+          onDragStart={() => {
+            if (setIsDragging) setIsDragging(true);
+            (window as any).isAliensDragging = true;
+            console.log('[FavoriteList] Drag started, isAliensDragging = true');
+          }}
+        >
           <Droppable droppableId="priority-list">
             {(provided, snapshot) => (
               <div

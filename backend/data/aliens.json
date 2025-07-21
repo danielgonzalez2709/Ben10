@@ -17,7 +17,7 @@
     },
     "isFavorite": false,
     "priority": 1,
-    "isActive": true,
+    "isActive": false,
     "category": "original"
   },
   {
@@ -36,7 +36,7 @@
         "Enhanced Reflexes"
       ]
     },
-    "isFavorite": true,
+    "isFavorite": false,
     "priority": 2,
     "isActive": false,
     "category": "original"
@@ -57,7 +57,7 @@
         "Durability"
       ]
     },
-    "isFavorite": true,
+    "isFavorite": false,
     "priority": 3,
     "isActive": false,
     "category": "original"
@@ -78,7 +78,7 @@
         "Heat Resistance"
       ]
     },
-    "isFavorite": true,
+    "isFavorite": false,
     "priority": 4,
     "isActive": false,
     "category": "original"
@@ -99,7 +99,7 @@
         "Agility"
       ]
     },
-    "isFavorite": true,
+    "isFavorite": false,
     "priority": 5,
     "isActive": false,
     "category": "original"
@@ -141,7 +141,7 @@
         "Agility"
       ]
     },
-    "isFavorite": false,
+    "isFavorite": true,
     "priority": 7,
     "isActive": false,
     "category": "original"
@@ -204,7 +204,7 @@
         "Possession"
       ]
     },
-    "isFavorite": true,
+    "isFavorite": false,
     "priority": 10,
     "isActive": false,
     "category": "original"
@@ -269,7 +269,7 @@
     },
     "isFavorite": true,
     "priority": 13,
-    "isActive": false,
+    "isActive": true,
     "category": "alienforce"
   },
   {
