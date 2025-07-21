@@ -8,7 +8,7 @@ import type { Comment } from '../types/comment';
 import { useAliens } from '../context/AliensContext';
 
 const FavoritesPage: React.FC = () => {
-  const { aliens, toggleFavorite } = useAliens();
+  const { aliens, toggleFavorite, setAliens } = useAliens();
   const [selectedAlien, setSelectedAlien] = useState<Alien | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -43,6 +43,15 @@ const FavoritesPage: React.FC = () => {
     [...favorites].sort((a, b) => a.priority - b.priority)
   );
 
+  // Sincronizar priorityList con favoritos del contexto SOLO si cambia el orden real
+  useEffect(() => {
+    const sorted = [...favorites].sort((a, b) => a.priority - b.priority);
+    if (priorityList.map(a => a.id).join(',') !== sorted.map(a => a.id).join(',')) {
+      setPriorityList(sorted);
+    }
+    // eslint-disable-next-line
+  }, [favorites]);
+
   // Bandera para saber si se está arrastrando
   const [isDragging, setIsDragging] = useState(false);
 
@@ -74,16 +83,12 @@ const FavoritesPage: React.FC = () => {
     items.splice(result.destination.index, 0, reordered);
     setPriorityList(items); // Solo actualiza el estado local para el drag
 
-    // Log para depuración: mostrar el nuevo orden
-    console.log('Nuevo orden de prioridad:', items.map(a => ({ id: a.id, name: a.name, priority: a.priority })));
-
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       await Promise.all(
         items.map(async (alien, idx) => {
-          console.log(`Enviando PUT a /api/aliens/${alien.id} con priority: ${idx + 1}`);
-          const res = await fetch(`http://localhost:3001/api/aliens/${alien.id}`, {
+          await fetch(`http://localhost:3001/api/aliens/${alien.id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -91,11 +96,9 @@ const FavoritesPage: React.FC = () => {
             },
             body: JSON.stringify({ priority: idx + 1 })
           });
-          const data = await res.json().catch(() => ({}));
-          console.log(`Respuesta backend para alien ${alien.id}:`, res.status, data);
         })
       );
-      // Espera a que el backend termine y luego refresca el estado global (el contexto lo hará solo)
+      // NO dispares el evento aliens:refresh aquí, deja que el polling del contexto lo haga
     } catch (err) {
       alert('Error al actualizar prioridades');
     } finally {
